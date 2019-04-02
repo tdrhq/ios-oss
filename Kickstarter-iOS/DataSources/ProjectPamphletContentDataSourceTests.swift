@@ -13,7 +13,115 @@ final class ProjectPamphletContentDataSourceTests: TestCase {
     self.dataSource.load(project: project)
 
     let section = ProjectPamphletContentDataSource.Section.calloutReward.rawValue
-    XCTAssertTrue(self.dataSource.indexPathIsPledgeAnyAmountCell(.init(row: 0, section: section)))
+    XCTAssertTrue(dataSource.indexPathIsPledgeAnyAmountCell(.init(row: 0, section: section)))
+  }
+
+  func testSubpages_NoLiveStreams() {
+    let section = ProjectPamphletContentDataSource.Section.subpages.rawValue
+
+    let project = .template
+      |> Project.lens.stats.commentsCount .~ 24
+      |> Project.lens.stats.updatesCount .~ 42
+
+    dataSource.load(project: project, liveStreamEvents: [])
+
+    XCTAssertEqual(2, self.dataSource.tableView(self.tableView, numberOfRowsInSection: section))
+    XCTAssertEqual(.comments(24, .first),
+                   self.dataSource[IndexPath(row: 0, section: section)] as? ProjectPamphletSubpage)
+    XCTAssertEqual(.updates(42, .last),
+                   self.dataSource[IndexPath(row: 1, section: section)] as? ProjectPamphletSubpage)
+  }
+
+  func testSubpages_LiveStreams_LiveStreamFeatureTurnedOff() {
+    let section = ProjectPamphletContentDataSource.Section.subpages.rawValue
+
+    let project = .template
+      |> Project.lens.stats.commentsCount .~ 24
+      |> Project.lens.stats.updatesCount .~ 42
+
+    let config = .template
+      |> Config.lens.features .~ [Feature.liveStreams.rawValue: false]
+
+    withEnvironment(config: config) {
+      dataSource.load(project: project, liveStreamEvents: [.template])
+
+      XCTAssertEqual(2, self.dataSource.tableView(self.tableView, numberOfRowsInSection: section))
+      XCTAssertEqual(.comments(24, .first),
+                     self.dataSource[IndexPath(row: 0, section: section)] as? ProjectPamphletSubpage)
+      XCTAssertEqual(.updates(42, .last),
+                     self.dataSource[IndexPath(row: 1, section: section)] as? ProjectPamphletSubpage)
+    }
+  }
+
+  func testSubpages_LiveStreams_LiveStreamFeatureTurnedOn() {
+    let section = ProjectPamphletContentDataSource.Section.subpages.rawValue
+
+    let currentlyLiveStream = .template
+      |> LiveStreamEvent.lens.id .~ 1
+      |> LiveStreamEvent.lens.liveNow .~ true
+      |> LiveStreamEvent.lens.startDate .~ MockDate().date
+
+    let futureLiveStreamSoon = .template
+      |> LiveStreamEvent.lens.id .~ 2
+      |> LiveStreamEvent.lens.liveNow .~ false
+      |> LiveStreamEvent.lens.startDate .~ MockDate().addingTimeInterval(60 * 60).date
+
+    let futureLiveStreamWayFuture = .template
+      |> LiveStreamEvent.lens.id .~ 3
+      |> LiveStreamEvent.lens.liveNow .~ false
+      |> LiveStreamEvent.lens.startDate .~ MockDate().addingTimeInterval(48 * 60 * 60).date
+
+    let pastLiveStreamRecent = .template
+      |> LiveStreamEvent.lens.id .~ 4
+      |> LiveStreamEvent.lens.liveNow .~ false
+      |> LiveStreamEvent.lens.startDate .~ MockDate().addingTimeInterval(-60 * 60).date
+
+    let pastLiveStreamWayPast = .template
+      |> LiveStreamEvent.lens.id .~ 5
+      |> LiveStreamEvent.lens.liveNow .~ false
+      |> LiveStreamEvent.lens.startDate .~ MockDate().addingTimeInterval(-24 * 60 * 60).date
+
+    let project = .template
+      |> Project.lens.stats.commentsCount .~ 24
+      |> Project.lens.stats.updatesCount .~ 42
+
+    let liveStreamEvents = [
+      futureLiveStreamWayFuture,
+      pastLiveStreamWayPast,
+      currentlyLiveStream,
+      pastLiveStreamRecent,
+      futureLiveStreamSoon,
+    ]
+
+    let config = .template
+      |> Config.lens.features .~ [Feature.liveStreams.rawValue: true]
+
+    withEnvironment(config: config) {
+      dataSource.load(project: project, liveStreamEvents: liveStreamEvents)
+
+      XCTAssertEqual(7, self.dataSource.tableView(self.tableView, numberOfRowsInSection: section))
+
+      XCTAssertEqual(.liveStream(liveStreamEvent: currentlyLiveStream, .first),
+                     self.dataSource[IndexPath(row: 0, section: section)] as? ProjectPamphletSubpage)
+
+      XCTAssertEqual(.liveStream(liveStreamEvent: futureLiveStreamSoon, .middle),
+                     self.dataSource[IndexPath(row: 1, section: section)] as? ProjectPamphletSubpage)
+
+      XCTAssertEqual(.liveStream(liveStreamEvent: futureLiveStreamWayFuture, .middle),
+                     self.dataSource[IndexPath(row: 2, section: section)] as? ProjectPamphletSubpage)
+
+      XCTAssertEqual(.liveStream(liveStreamEvent: pastLiveStreamRecent, .middle),
+                     self.dataSource[IndexPath(row: 3, section: section)] as? ProjectPamphletSubpage)
+
+      XCTAssertEqual(.liveStream(liveStreamEvent: pastLiveStreamWayPast, .middle),
+                     self.dataSource[IndexPath(row: 4, section: section)] as? ProjectPamphletSubpage)
+
+      XCTAssertEqual(.comments(24, .middle),
+                     self.dataSource[IndexPath(row: 5, section: section)] as? ProjectPamphletSubpage)
+
+      XCTAssertEqual(.updates(42, .last),
+                     self.dataSource[IndexPath(row: 6, section: section)] as? ProjectPamphletSubpage)
+    }
   }
 
   func testAvailableRewardsSection_ShowsCorrectValues() {
@@ -44,5 +152,46 @@ final class ProjectPamphletContentDataSourceTests: TestCase {
 
     XCTAssertEqual(0, self.dataSource.tableView(self.tableView, numberOfRowsInSection: availableSection))
     XCTAssertEqual(1, self.dataSource.tableView(self.tableView, numberOfRowsInSection: unavailableSection))
+  }
+
+  func testRewardsSection_nativeCheckoutFeature_hidesWhenTurnedOn() {
+    let config = .template
+      |> Config.lens.features .~ [Feature.checkout.rawValue: true]
+
+    withEnvironment(config: config) {
+      let availableReward = Reward.template
+        |> Reward.lens.remaining .~ 1
+      let unavailableReward = Reward.template
+        |> Reward.lens.remaining .~ 0
+      let project = Project.template
+        |> Project.lens.rewards .~ [availableReward, unavailableReward]
+
+      dataSource.load(project: project, liveStreamEvents: [])
+
+      XCTAssertEqual(2, self.dataSource.numberOfSections(in: self.tableView))
+    }
+  }
+
+  func testRewardsSection_nativeCheckoutFeature_showsWithTurnedOff() {
+    let config = .template
+      |> Config.lens.features .~ [Feature.checkout.rawValue: false]
+
+    withEnvironment(config: config) {
+      let availableSection = ProjectPamphletContentDataSource.Section.availableRewards.rawValue
+      let unavailableSection = ProjectPamphletContentDataSource.Section.unavailableRewards.rawValue
+
+      let availableReward = Reward.template
+        |> Reward.lens.remaining .~ 1
+      let unavailableReward = Reward.template
+        |> Reward.lens.remaining .~ 0
+      let project = Project.template
+        |> Project.lens.rewards .~ [availableReward, unavailableReward]
+
+      dataSource.load(project: project, liveStreamEvents: [])
+
+      XCTAssertEqual(7, self.dataSource.numberOfSections(in: self.tableView))
+      XCTAssertEqual(1, self.dataSource.tableView(self.tableView, numberOfRowsInSection: availableSection))
+      XCTAssertEqual(1, self.dataSource.tableView(self.tableView, numberOfRowsInSection: unavailableSection))
+    }
   }
 }
