@@ -4,8 +4,8 @@ import Prelude
 import Stripe
 import UIKit
 
-internal final class RewardPledgeViewController: UIViewController {
-  internal let viewModel: RewardPledgeViewModelType = RewardPledgeViewModel()
+internal final class DeprecatedRewardPledgeViewController: UIViewController {
+  internal let viewModel: DeprecatedRewardPledgeViewModelType = DeprecatedRewardPledgeViewModel()
 
   fileprivate var applePayButton = PKPaymentButton()
   @IBOutlet fileprivate var applePayButtonContainerView: UIStackView!
@@ -69,12 +69,12 @@ internal final class RewardPledgeViewController: UIViewController {
   internal static func configuredWith(
     project: Project,
     reward: Reward,
-    applePayCapable: Bool = PKPaymentAuthorizationViewController.applePayCapable()
-  )
-    -> RewardPledgeViewController {
-    let vc = Storyboard.RewardPledge.instantiate(RewardPledgeViewController.self)
-    vc.viewModel.inputs.configureWith(project: project, reward: reward, applePayCapable: applePayCapable)
-    return vc
+    applePayCapable: Bool = PKPaymentAuthorizationViewController.applePayCapable())
+    -> DeprecatedRewardPledgeViewController {
+
+      let vc = Storyboard.RewardPledge.instantiate(DeprecatedRewardPledgeViewController.self)
+      vc.viewModel.inputs.configureWith(project: project, reward: reward, applePayCapable: applePayCapable)
+      return vc
   }
 
   deinit {
@@ -157,7 +157,7 @@ internal final class RewardPledgeViewController: UIViewController {
 
     _ = self
       |> baseControllerStyle()
-      |> RewardPledgeViewController.lens.view.backgroundColor .~ .ksr_grey_300
+      |> DeprecatedRewardPledgeViewController.lens.view.backgroundColor .~ .ksr_grey_300
 
     _ = self.applePayButton
       |> roundedStyle(cornerRadius: 0)
@@ -685,7 +685,8 @@ internal final class RewardPledgeViewController: UIViewController {
   }
 }
 
-extension RewardPledgeViewController: PKPaymentAuthorizationViewControllerDelegate {
+extension DeprecatedRewardPledgeViewController: PKPaymentAuthorizationViewControllerDelegate {
+
   internal func paymentAuthorizationViewControllerWillAuthorizePayment(
     _: PKPaymentAuthorizationViewController
   ) {
@@ -718,7 +719,7 @@ extension RewardPledgeViewController: PKPaymentAuthorizationViewControllerDelega
   }
 }
 
-extension RewardPledgeViewController: RewardShippingPickerViewControllerDelegate {
+extension DeprecatedRewardPledgeViewController: RewardShippingPickerViewControllerDelegate {
   internal func rewardShippingPickerViewControllerCancelled(
     _ controller: RewardShippingPickerViewController
   ) {
