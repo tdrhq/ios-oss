@@ -3,6 +3,9 @@ import Prelude
 import ReactiveSwift
 
 public protocol ProjectPamphletViewModelInputs {
+  /// Call when "Back this project" is tapped
+  func backThisProjectTapped()
+
   /// Call with the project given to the view controller.
   func configureWith(projectOrParam: Either<Project, Param>, refTag: RefTag?)
 
@@ -23,7 +26,14 @@ public protocol ProjectPamphletViewModelInputs {
 
 public protocol ProjectPamphletViewModelOutputs {
   /// Emits a project that should be used to configure all children view controllers.
-  var configureChildViewControllersWithProject: Signal<(Project, RefTag?), Never> { get }
+  var configureChildViewControllersWithProjectAndLiveStreams: Signal<(Project, [LiveStreamEvent],
+    RefTag?), NoError> { get }
+
+  /// Emits a project and refTag to be used to navigate to the reward selection screen
+  var goToRewards: Signal<(Project, RefTag?), NoError> { get }
+
+  /// Return this value from the view's `prefersStatusBarHidden` method.
+  var prefersStatusBarHidden: Bool { get }
 
   /// Emits two booleans that determine if the navigation bar should be hidden, and if it should be animated.
   var setNavigationBarHiddenAnimated: Signal<(Bool, Bool), Never> { get }
@@ -50,11 +60,20 @@ public final class ProjectPamphletViewModel: ProjectPamphletViewModelType, Proje
       ))
       .map(unpack)
       .switchMap { projectOrParam, refTag, shouldPrefix in
-        fetchProject(projectOrParam: projectOrParam, shouldPrefix: shouldPrefix)
-          .map { project in
-            (project, refTag.map(cleanUp(refTag:)))
-          }
-      }
+        fetchProjectAndLiveStreams(projectOrParam: projectOrParam, shouldPrefix: shouldPrefix)
+          .map { project, liveStreams in
+            (project, liveStreams, refTag.map(cleanUp(refTag:)))
+        }
+    }
+
+    self.goToRewards = freshProjectAndLiveStreamsAndRefTag
+      .takeWhen(self.backThisProjectTappedProperty.signal)
+      .map { project, _, refTag in
+        return (project, refTag)
+    }
+
+    self.configureChildViewControllersWithProjectAndLiveStreams = freshProjectAndLiveStreamsAndRefTag
+      .map { project, liveStreams, refTag in (project, liveStreams ?? [], refTag) }
 
     self.configureChildViewControllersWithProject = freshProjectAndRefTag
       .map { project, refTag in (project, refTag) }
@@ -101,6 +120,11 @@ public final class ProjectPamphletViewModel: ProjectPamphletViewModelType, Proje
       .observeValues { AppEnvironment.current.cookieStorage.setCookie($0) }
   }
 
+  private let backThisProjectTappedProperty = MutableProperty(())
+  public func backThisProjectTapped() {
+    self.backThisProjectTappedProperty.value = ()
+  }
+
   private let configDataProperty = MutableProperty<(Either<Project, Param>, RefTag?)?>(nil)
   public func configureWith(projectOrParam: Either<Project, Param>, refTag: RefTag?) {
     self.configDataProperty.value = (projectOrParam, refTag)
@@ -134,9 +158,10 @@ public final class ProjectPamphletViewModel: ProjectPamphletViewModelType, Proje
 
   public let configureChildViewControllersWithProject: Signal<(Project, RefTag?), Never>
 
-  public let setNavigationBarHiddenAnimated: Signal<(Bool, Bool), Never>
-  public let setNeedsStatusBarAppearanceUpdate: Signal<(), Never>
-  public let topLayoutConstraintConstant: Signal<CGFloat, Never>
+  public let goToRewards: Signal<(Project, RefTag?), NoError>
+  public let setNavigationBarHiddenAnimated: Signal<(Bool, Bool), NoError>
+  public let setNeedsStatusBarAppearanceUpdate: Signal<(), NoError>
+  public let topLayoutConstraintConstant: Signal<CGFloat, NoError>
 
   public var inputs: ProjectPamphletViewModelInputs { return self }
   public var outputs: ProjectPamphletViewModelOutputs { return self }

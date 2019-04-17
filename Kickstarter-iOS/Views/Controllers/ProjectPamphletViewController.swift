@@ -17,7 +17,31 @@ public final class ProjectPamphletViewController: UIViewController {
   fileprivate var navBarController: ProjectNavBarViewController!
   fileprivate var contentController: ProjectPamphletContentViewController!
 
-  @IBOutlet private var navBarTopConstraint: NSLayoutConstraint!
+  @IBOutlet weak private var navBarTopConstraint: NSLayoutConstraint!
+
+  private let backThisProjectContainerViewMargins = Styles.grid(3)
+  private let backThisProjectContainerView: UIView = {
+    return UIView(frame: .zero) |> \.translatesAutoresizingMaskIntoConstraints .~ false
+  }()
+
+  private let backThisProjectButton: UIButton = {
+     return MultiLineButton(type: .custom)
+      |> \.translatesAutoresizingMaskIntoConstraints .~ false
+  }()
+
+  private let backThisProjectContainerSublayer: CAShapeLayer = {
+    let mask = CAShapeLayer()
+      |> \.fillColor .~ UIColor.white.cgColor
+      |> \.shadowColor .~ UIColor.black.cgColor
+      |> \.shadowOpacity .~ 0.12
+      |> \.shadowOffset .~ CGSize(width: 0, height: -1.0)
+      |> \.shadowRadius .~ 1.0
+
+    return mask
+  }()
+
+  public static func configuredWith(projectOrParam: Either<Project, Param>,
+                                    refTag: RefTag?) -> ProjectPamphletViewController {
 
   public static func configuredWith(
     projectOrParam: Either<Project, Param>,
@@ -30,6 +54,10 @@ public final class ProjectPamphletViewController: UIViewController {
 
   public override func viewDidLoad() {
     super.viewDidLoad()
+
+    if shouldShowNativeCheckout() {
+      self.configureViews()
+    }
 
     self.navBarController = self.children
       .compactMap { $0 as? ProjectNavBarViewController }.first
@@ -51,10 +79,13 @@ public final class ProjectPamphletViewController: UIViewController {
 
   public override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
-    self.setInitial(
-      constraints: [navBarTopConstraint],
-      constant: self.initialTopConstraint
-    )
+    self.setInitial(constraints: [navBarTopConstraint],
+                    constant: initialTopConstraint)
+
+    if self.shouldShowNativeCheckout() {
+      self.configureSublayers()
+      self.updateContentInsets()
+    }
   }
 
   public override func viewDidAppear(_ animated: Bool) {
@@ -66,10 +97,60 @@ public final class ProjectPamphletViewController: UIViewController {
     return self.parent?.view.safeAreaInsets.top ?? 0.0
   }
 
+  private func configureViews() {
+    // Configure subviews
+    self.backThisProjectContainerView.addSubview(self.backThisProjectButton)
+
+    self.view.addSubview(self.backThisProjectContainerView)
+
+    self.backThisProjectButton.addTarget(self, action: #selector(backThisProjectTapped), for: .touchUpInside)
+
+    // Configure constraints
+    let backThisProjectContainerViewConstraints = [
+      self.backThisProjectContainerView.leftAnchor.constraint(equalTo: self.view.leftAnchor),
+      self.backThisProjectContainerView.rightAnchor.constraint(equalTo: self.view.rightAnchor),
+      self.backThisProjectContainerView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
+    ]
+
+    let containerMargins = self.backThisProjectContainerView.layoutMarginsGuide
+    let minHeight = Styles.minTouchSize.height
+
+    let backThisProjectButtonConstraints = [
+      self.backThisProjectButton.leftAnchor.constraint(equalTo: containerMargins.leftAnchor),
+      self.backThisProjectButton.rightAnchor.constraint(equalTo: containerMargins.rightAnchor),
+      self.backThisProjectButton.bottomAnchor.constraint(equalTo: containerMargins.bottomAnchor),
+      self.backThisProjectButton.topAnchor.constraint(equalTo: containerMargins.topAnchor),
+      self.backThisProjectButton.heightAnchor.constraint(greaterThanOrEqualToConstant: minHeight)
+    ]
+
+    NSLayoutConstraint.activate(backThisProjectContainerViewConstraints + backThisProjectButtonConstraints)
+  }
+
+  public override func bindStyles() {
+    super.bindStyles()
+
+    _ = self.backThisProjectContainerView
+      |> \.layoutMargins .~ .init(all: backThisProjectContainerViewMargins)
+
+    _ = self.backThisProjectButton
+      |> backThisProjectButtonStyle
+
+    _ = self.backThisProjectButton.titleLabel
+      ?|> backThisProjectButtonTitleLabelStyle
+  }
+
   public override func bindViewModel() {
     super.bindViewModel()
 
-    self.viewModel.outputs.configureChildViewControllersWithProject
+    self.viewModel.outputs.goToRewards
+      .observeForControllerAction()
+      .observeValues { [weak self] params in
+        let (project, refTag) = params
+
+        self?.goToRewards(project: project, refTag: refTag)
+    }
+
+    self.viewModel.outputs.configureChildViewControllersWithProjectAndLiveStreams
       .observeForUI()
       .observeValues { [weak self] project, refTag in
         self?.contentController.configureWith(project: project)
@@ -100,10 +181,56 @@ public final class ProjectPamphletViewController: UIViewController {
     self.viewModel.inputs.willTransition(toNewCollection: newCollection)
   }
 
+  // MARK: - Private View Setup Functions
+  private func configureSublayers() {
+    let updatedPath = UIBezierPath(roundedRect: self.backThisProjectContainerView.bounds,
+                                   byRoundingCorners: [.topLeft, .topRight],
+                                   cornerRadii: CGSize(width: 16, height: 16))
+
+    _ = self.backThisProjectContainerSublayer
+      |> \.path .~ updatedPath.cgPath
+
+    if self.backThisProjectContainerView.layer.sublayers?.count == 1 {
+      self.backThisProjectContainerView.layer.insertSublayer(self.backThisProjectContainerSublayer, at: 0)
+    }
+  }
+
   private func setInitial(constraints: [NSLayoutConstraint?], constant: CGFloat) {
     constraints.forEach {
       $0?.constant = constant
     }
+  }
+
+  private func goToRewards(project: Project, refTag: RefTag?) {
+
+  }
+
+  // MARK: - Private Helpers
+  private func shouldShowNativeCheckout() -> Bool {
+    // Show native checkout only if the `ios_native_checkout` flag is enabled
+    return AppEnvironment.current.config?.features[Feature.checkout.rawValue] == .some(true)
+  }
+
+  private func updateContentInsets() {
+    let buttonSize = self.backThisProjectButton.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
+    let bottomInset = buttonSize.height + 2 * self.backThisProjectContainerViewMargins
+
+    if #available(iOS 11.0, *) {
+      self.contentController.additionalSafeAreaInsets = UIEdgeInsets(bottom: bottomInset)
+    } else {
+      let insets = self.contentController.tableView.contentInset
+
+      self.contentController.tableView.contentInset = UIEdgeInsets(top: insets.top,
+                                                                   left: insets.left,
+                                                                   bottom: bottomInset,
+                                                                   right: insets.right)
+    }
+  }
+
+  // MARK: - Selectors
+
+  @objc func backThisProjectTapped() {
+    self.viewModel.inputs.backThisProjectTapped()
   }
 }
 
@@ -144,4 +271,30 @@ extension ProjectPamphletViewController: ProjectNavBarViewControllerDelegate {
   public func projectNavBarControllerDidTapTitle(_: ProjectNavBarViewController) {
     self.contentController.tableView.scrollToTop()
   }
+}
+
+// MARK: - Styles
+
+private var backThisProjectButtonStyle = { (button: UIButton) -> UIButton in
+  button
+    |> greenButtonStyle
+    |> roundedStyle(cornerRadius: 12)
+    |> UIButton.lens.layer.borderWidth .~ 0
+    |> UIButton.lens.titleEdgeInsets .~ .init(topBottom: Styles.grid(1), leftRight: Styles.grid(2))
+    |> UIButton.lens.title(for: .normal) %~ { _ in
+      return Strings.project_back_button()
+  }
+}
+
+private var backThisProjectButtonTitleLabelStyle = { (titleLabel: UILabel?) -> UILabel? in
+  _ = titleLabel
+    ?|> \.font .~ UIFont.ksr_headline()
+    ?|> \.numberOfLines .~ 0
+
+  // Breaking this up to help the compiler
+  _ = titleLabel
+    ?|> \.textAlignment .~ NSTextAlignment.center
+    ?|> \.lineBreakMode .~ NSLineBreakMode.byWordWrapping
+
+  return titleLabel
 }
