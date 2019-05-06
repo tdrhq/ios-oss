@@ -5,7 +5,11 @@ public extension UICollectionView {
     register(cellClass, forCellWithReuseIdentifier: cellClass.description())
   }
 
-  func registerCellNibForClass(_ cellClass: AnyClass) {
+  public func register<T: ValueCell>(_ cellClass: T.Type) {
+    self.register(cellClass, forCellWithReuseIdentifier: T.defaultReusableId)
+  }
+
+  public func registerCellNibForClass(_ cellClass: AnyClass) {
     let classNameWithoutModule = cellClass
       .description()
       .components(separatedBy: ".")
