@@ -66,9 +66,9 @@ public final class ProjectPamphletViewModel: ProjectPamphletViewModelType, Proje
         }
     }
 
-    self.goToRewards = freshProjectAndLiveStreamsAndRefTag
+    self.goToRewards = freshProjectAndRefTag
       .takeWhen(self.backThisProjectTappedProperty.signal)
-      .map { project, _, refTag in
+      .map { project, refTag in
         return (project, refTag)
     }
 
