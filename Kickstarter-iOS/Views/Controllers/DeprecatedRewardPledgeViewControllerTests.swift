@@ -44,7 +44,6 @@ internal final class DeprecatedRewardPledgeViewControllerTests: TestCase {
 
     combos(Language.allLanguages, [false, true]).forEach { language, applePayCapable in
       withEnvironment(language: language, locale: .init(identifier: language.rawValue)) {
-
         let vc = DeprecatedRewardPledgeViewController.configuredWith(
           project: project, reward: reward, applePayCapable: applePayCapable
         )

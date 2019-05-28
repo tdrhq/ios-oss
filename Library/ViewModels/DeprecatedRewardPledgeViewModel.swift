@@ -210,7 +210,6 @@ private typealias Inputs = DeprecatedRewardPledgeViewModelInputs
 private typealias Outputs = DeprecatedRewardPledgeViewModelOutputs
 
 public final class DeprecatedRewardPledgeViewModel: Type, Inputs, Outputs {
-
   fileprivate let rewardViewModel: RewardCellViewModelType = DeprecatedRewardCellViewModel()
 
   public init() {
@@ -262,7 +261,7 @@ public final class DeprecatedRewardPledgeViewModel: Type, Inputs, Outputs {
     let shippingRules = shippingRulesEvent.values()
 
     self.navigationTitle = projectAndReward
-      .map(navigationTitleForProject(_:reward:))
+      .map(title(forProject:reward:))
 
     self.setStripeAppleMerchantIdentifier = applePayCapable
       .filter(isTrue)
@@ -482,7 +481,7 @@ public final class DeprecatedRewardPledgeViewModel: Type, Inputs, Outputs {
     .map(paymentRequest(forProject:reward:pledgeAmount:selectedShippingRule:merchantIdentifier:))
 
     let isLoading = MutableProperty(false)
-    self.pledgeIsLoading = isLoading.signal
+    pledgeIsLoading = isLoading.signal
 
     self.loadingOverlayIsHidden = Signal.merge(
       self.viewDidLoadProperty.signal.mapConst(true),
@@ -892,55 +891,57 @@ public final class DeprecatedRewardPledgeViewModel: Type, Inputs, Outputs {
     return self.rewardViewModel.outputs.conversionLabelHidden
   }
 
-  public var conversionLabelText: Signal<String, Never> {
+  public var conversionLabelText: Signal<String, NoError> {
     return self.rewardViewModel.outputs.conversionLabelText
   }
 
-  public let countryLabelText: Signal<String, Never>
-  public var descriptionLabelText: Signal<String, Never> {
+  public let countryLabelText: Signal<String, NoError>
+  public var descriptionLabelText: Signal<String, NoError> {
     return self.rewardViewModel.outputs.descriptionLabelText
   }
 
-  public let differentPaymentMethodButtonHidden: Signal<Bool, Never>
-  public let dismissViewController: Signal<(), Never>
-  public let estimatedDeliveryDateLabelText: Signal<String, Never>
-  public let estimatedFulfillmentStackViewHidden: Signal<Bool, Never>
-  public let expandRewardDescription: Signal<(), Never>
-  public let fulfillmentAndShippingFooterStackViewHidden: Signal<Bool, Never>
-  public let goToCheckout: Signal<(URLRequest, Project, Reward), Never>
-  public let goToLoginTout: Signal<(), Never>
-  public let goToPaymentAuthorization: Signal<PKPaymentRequest, Never>
-  public let goToShippingPicker: Signal<(Project, [ShippingRule], ShippingRule), Never>
-  public let goToThanks: Signal<Project, Never>
-  public let goToTrustAndSafety: Signal<(), Never>
-  public var items: Signal<[String], Never> {
+  public let differentPaymentMethodButtonHidden: Signal<Bool, NoError>
+  public let dismissViewController: Signal<(), NoError>
+  public let estimatedDeliveryDateLabelText: Signal<String, NoError>
+  public let estimatedFulfillmentStackViewHidden: Signal<Bool, NoError>
+  public let expandRewardDescription: Signal<(), NoError>
+  public let fulfillmentAndShippingFooterStackViewHidden: Signal<Bool, NoError>
+  public let goToCheckout: Signal<(URLRequest, Project, Reward), NoError>
+  public let goToLoginTout: Signal<(), NoError>
+  public let goToPaymentAuthorization: Signal<PKPaymentRequest, NoError>
+  public let goToShippingPicker: Signal<(Project, [ShippingRule], ShippingRule), NoError>
+  public let goToThanks: Signal<Project, NoError>
+  public let goToTrustAndSafety: Signal<(), NoError>
+  public var items: Signal<[String], NoError> {
     return self.rewardViewModel.outputs.items
   }
 
-  public let itemsContainerHidden: Signal<Bool, Never>
-  public let loadingOverlayIsHidden: Signal<Bool, Never>
-  public var minimumLabelText: Signal<String, Never> {
+  public let itemsContainerHidden: Signal<Bool, NoError>
+  public let loadingOverlayIsHidden: Signal<Bool, NoError>
+  public var minimumLabelText: Signal<String, NoError> {
     return self.rewardViewModel.outputs.minimumLabelText
   }
 
-  public let navigationTitle: Signal<String, Never>
-  public let orLabelHidden: Signal<Bool, Never>
-  public let paddingViewHeightConstant: Signal<CGFloat, Never>
-  public let pledgeCurrencyLabelText: Signal<String, Never>
-  public let pledgeIsLoading: Signal<Bool, Never>
-  public let pledgeTextFieldText: Signal<String, Never>
-  public let readMoreContainerViewHidden: Signal<Bool, Never>
-  public let setStripeAppleMerchantIdentifier: Signal<String, Never>
-  public let setStripePublishableKey: Signal<String, Never>
-  public let shippingAmountLabelText: Signal<String, Never>
-  public let shippingInputStackViewHidden: Signal<Bool, Never>
-  public let shippingIsLoading: Signal<Bool, Never>
-  public let shippingLocationsLabelText: Signal<String, Never>
-  public let shippingStackViewHidden: Signal<Bool, Never>
-  public let showAlert: Signal<(message: String, shouldDismiss: Bool), Never>
-  public var titleLabelHidden: Signal<Bool, Never> {
+  public let navigationTitle: Signal<String, NoError>
+  public let orLabelHidden: Signal<Bool, NoError>
+  public let paddingViewHeightConstant: Signal<CGFloat, NoError>
+  public let pledgeCurrencyLabelText: Signal<String, NoError>
+  public let pledgeIsLoading: Signal<Bool, NoError>
+  public let pledgeTextFieldText: Signal<String, NoError>
+  public let readMoreContainerViewHidden: Signal<Bool, NoError>
+  public let setStripeAppleMerchantIdentifier: Signal<String, NoError>
+  public let setStripePublishableKey: Signal<String, NoError>
+  public let shippingAmountLabelText: Signal<String, NoError>
+  public let shippingInputStackViewHidden: Signal<Bool, NoError>
+  public let shippingIsLoading: Signal<Bool, NoError>
+  public let shippingLocationsLabelText: Signal<String, NoError>
+  public let shippingStackViewHidden: Signal<Bool, NoError>
+  public let showAlert: Signal<(message: String, shouldDismiss: Bool), NoError>
+  public var titleLabelHidden: Signal<Bool, NoError> {
     return self.rewardViewModel.outputs.titleLabelHidden
   }
+
+  public let titleLabelText: Signal<String, NoError>
 
   public let titleLabelText: Signal<String, Never>
 
@@ -1168,7 +1169,7 @@ private func changePaymentMethod(project: Project) -> SignalProducer<URLRequest,
     .skipNil()
 }
 
-private func navigationTitleForProject(_ project: Project, reward: Reward) -> String {
+private func title(forProject project: Project, reward: Reward) -> String {
   guard project.personalization.isBacking != true else {
     if reward == Reward.noReward {
       return Strings.Manage_your_pledge()

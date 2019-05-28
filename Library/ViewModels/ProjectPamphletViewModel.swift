@@ -60,17 +60,17 @@ public final class ProjectPamphletViewModel: ProjectPamphletViewModelType, Proje
       ))
       .map(unpack)
       .switchMap { projectOrParam, refTag, shouldPrefix in
-        fetchProjectAndLiveStreams(projectOrParam: projectOrParam, shouldPrefix: shouldPrefix)
-          .map { project, liveStreams in
-            (project, liveStreams, refTag.map(cleanUp(refTag:)))
-        }
-    }
+        fetchProject(projectOrParam: projectOrParam, shouldPrefix: shouldPrefix)
+          .map { project in
+            (project, refTag.map(cleanUp(refTag:)))
+          }
+      }
 
     self.goToRewards = freshProjectAndRefTag
       .takeWhen(self.backThisProjectTappedProperty.signal)
       .map { project, refTag in
-        return (project, refTag)
-    }
+        (project, refTag)
+      }
 
     self.configureChildViewControllersWithProjectAndLiveStreams = freshProjectAndLiveStreamsAndRefTag
       .map { project, liveStreams, refTag in (project, liveStreams ?? [], refTag) }
@@ -90,7 +90,7 @@ public final class ProjectPamphletViewModel: ProjectPamphletViewModelType, Proje
 
     self.topLayoutConstraintConstant = self.initialTopConstraintProperty.signal.skipNil()
       .takePairWhen(self.willTransitionToCollectionProperty.signal.skipNil())
-      .map(topLayoutConstraintConstantWithInitialTopConstraint(_:traitCollection:))
+      .map(layoutConstraintConstant(initialTopConstraint:traitCollection:))
 
     let cookieRefTag = freshProjectAndRefTag
       .map { project, refTag in
@@ -170,8 +170,8 @@ public final class ProjectPamphletViewModel: ProjectPamphletViewModelType, Proje
 private let cookieSeparator = "?"
 private let escapedCookieSeparator = "%3F"
 
-private func topLayoutConstraintConstantWithInitialTopConstraint(
-  _ initialTopConstraint: CGFloat,
+private func layoutConstraintConstant(
+  initialTopConstraint: CGFloat,
   traitCollection: UITraitCollection
 ) -> CGFloat {
   guard !traitCollection.isRegularRegular else {
@@ -238,7 +238,7 @@ private func cookieFrom(refTag: RefTag, project: Project) -> HTTPCookie? {
 }
 
 private func fetchProject(projectOrParam: Either<Project, Param>, shouldPrefix: Bool)
-  -> SignalProducer<Project, Never> {
+  -> SignalProducer<Project, NoError> {
   let param = projectOrParam.ifLeft({ Param.id($0.id) }, ifRight: id)
 
   let projectProducer = AppEnvironment.current.apiService.fetchProject(param: param)

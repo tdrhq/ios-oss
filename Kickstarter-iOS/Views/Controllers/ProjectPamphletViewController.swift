@@ -3,12 +3,16 @@ import Library
 import Prelude
 import UIKit
 
-public protocol ProjectPamphletViewControllerDelegate: class {
-  func projectPamphlet(_ controller: ProjectPamphletViewController,
-                       panGestureRecognizerDidChange recognizer: UIPanGestureRecognizer)
-  func projectPamphletViewController(_ projectPamphletViewController: ProjectPamphletViewController,
-                                     didTapBackThisProject project: Project,
-                                     refTag: RefTag?)
+public protocol ProjectPamphletViewControllerDelegate: AnyObject {
+  func projectPamphlet(
+    _ controller: ProjectPamphletViewController,
+    panGestureRecognizerDidChange recognizer: UIPanGestureRecognizer
+  )
+  func projectPamphletViewController(
+    _ projectPamphletViewController: ProjectPamphletViewController,
+    didTapBackThisProject project: Project,
+    refTag: RefTag?
+  )
 }
 
 public final class ProjectPamphletViewController: UIViewController {
@@ -18,20 +22,17 @@ public final class ProjectPamphletViewController: UIViewController {
   fileprivate var navBarController: ProjectNavBarViewController!
   fileprivate var contentController: ProjectPamphletContentViewController!
 
-  @IBOutlet weak private var navBarTopConstraint: NSLayoutConstraint!
+  @IBOutlet private var navBarTopConstraint: NSLayoutConstraint!
 
   private let backThisProjectContainerViewMargins = Styles.grid(3)
   private let backThisProjectContainerView: UIView = {
-    return UIView(frame: .zero) |> \.translatesAutoresizingMaskIntoConstraints .~ false
+    UIView(frame: .zero) |> \.translatesAutoresizingMaskIntoConstraints .~ false
   }()
 
   private let backThisProjectButton: UIButton = {
-     return MultiLineButton(type: .custom)
+    MultiLineButton(type: .custom)
       |> \.translatesAutoresizingMaskIntoConstraints .~ false
   }()
-
-  public static func configuredWith(projectOrParam: Either<Project, Param>,
-                                    refTag: RefTag?) -> ProjectPamphletViewController {
 
   public static func configuredWith(
     projectOrParam: Either<Project, Param>,
@@ -45,7 +46,7 @@ public final class ProjectPamphletViewController: UIViewController {
   public override func viewDidLoad() {
     super.viewDidLoad()
 
-    if shouldShowNativeCheckout() {
+    if self.shouldShowNativeCheckout() {
       self.configureViews()
     }
 
@@ -69,8 +70,10 @@ public final class ProjectPamphletViewController: UIViewController {
 
   public override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
-    self.setInitial(constraints: [navBarTopConstraint],
-                    constant: initialTopConstraint)
+    self.setInitial(
+      constraints: [navBarTopConstraint],
+      constant: self.initialTopConstraint
+    )
 
     if self.shouldShowNativeCheckout() {
       self.updateContentInsets()
@@ -90,7 +93,7 @@ public final class ProjectPamphletViewController: UIViewController {
     super.bindStyles()
 
     _ = self.backThisProjectContainerView
-      |> \.layoutMargins .~ .init(all: backThisProjectContainerViewMargins)
+      |> \.layoutMargins .~ .init(all: self.backThisProjectContainerViewMargins)
 
     _ = self.backThisProjectContainerView.layer
       |> checkoutLayerCardRoundedStyle
@@ -104,8 +107,8 @@ public final class ProjectPamphletViewController: UIViewController {
     _ = self.backThisProjectButton
       |> checkoutGreenButtonStyle
       |> UIButton.lens.title(for: .normal) %~ { _ in
-        return Strings.project_back_button()
-    }
+        Strings.project_back_button()
+      }
 
     _ = self.backThisProjectButton.titleLabel
       ?|> checkoutGreenButtonTitleLabelStyle
@@ -120,7 +123,7 @@ public final class ProjectPamphletViewController: UIViewController {
         let (project, refTag) = params
 
         self?.goToRewards(project: project, refTag: refTag)
-    }
+      }
 
     self.viewModel.outputs.configureChildViewControllersWithProjectAndLiveStreams
       .observeForUI()
@@ -162,7 +165,9 @@ public final class ProjectPamphletViewController: UIViewController {
     _ = (self.backThisProjectContainerView, self.view)
       |> ksr_addSubviewToParent()
 
-    self.backThisProjectButton.addTarget(self, action: #selector(backThisProjectTapped), for: .touchUpInside)
+    self.backThisProjectButton.addTarget(
+      self, action: #selector(ProjectPamphletViewController.backThisProjectTapped), for: .touchUpInside
+    )
 
     // Configure constraints
     let backThisProjectContainerViewConstraints = [
@@ -194,9 +199,11 @@ public final class ProjectPamphletViewController: UIViewController {
   }
 
   private func goToRewards(project: Project, refTag: RefTag?) {
-    self.delegate?.projectPamphletViewController(self,
-                                                 didTapBackThisProject: project,
-                                                 refTag: refTag)
+    self.delegate?.projectPamphletViewController(
+      self,
+      didTapBackThisProject: project,
+      refTag: refTag
+    )
   }
 
   private func shouldShowNativeCheckout() -> Bool {

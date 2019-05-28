@@ -4,6 +4,7 @@ import PassKit
 import Prelude
 import ReactiveExtensions
 import ReactiveSwift
+import Result
 import Runes
 
 public protocol DeprecatedCheckoutViewModelInputs {
@@ -85,13 +86,12 @@ public protocol DeprecatedCheckoutViewModelOutputs {
 }
 
 public protocol DeprecatedCheckoutViewModelType:
-DeprecatedCheckoutViewModelInputs, DeprecatedCheckoutViewModelOutputs {
+  DeprecatedCheckoutViewModelInputs, DeprecatedCheckoutViewModelOutputs {
   var inputs: DeprecatedCheckoutViewModelInputs { get }
   var outputs: DeprecatedCheckoutViewModelOutputs { get }
 }
 
 public final class DeprecatedCheckoutViewModel: DeprecatedCheckoutViewModelType {
-
   fileprivate let checkoutRacingViewModel: CheckoutRacingViewModelType = CheckoutRacingViewModel()
 
   public init() {
@@ -406,7 +406,7 @@ public final class DeprecatedCheckoutViewModel: DeprecatedCheckoutViewModelType 
     return self.checkoutRacingViewModel.outputs.showAlert
   }
 
-  public let webViewLoadRequest: Signal<URLRequest, Never>
+  public let webViewLoadRequest: Signal<URLRequest, NoError>
 
   public var inputs: DeprecatedCheckoutViewModelInputs { return self }
   public var outputs: DeprecatedCheckoutViewModelOutputs { return self }
@@ -447,8 +447,7 @@ private func isStripeRequest(request: URLRequest) -> Bool {
   return request.url?.host?.hasSuffix("stripe.com") == true
 }
 
-private func applePayCheckoutNextJS(forPaymentData paymentData: PaymentData, stripeToken: String)
-  -> String? {
+private func applePayCheckoutNextJS(forPaymentData paymentData: PaymentData, stripeToken: String) -> String? {
   let tokenData = paymentData.tokenData
 
   var json: [String: [String: String]] = [:]

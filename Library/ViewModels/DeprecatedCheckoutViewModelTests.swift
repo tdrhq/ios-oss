@@ -3,9 +3,11 @@
 import PassKit
 import Prelude
 import ReactiveExtensions_TestHelpers
+import Result
+import XCTest
+
 // swiftlint:disable force_unwrapping
 // swiftlint:disable force_cast
-import XCTest
 
 private let questionMark = CharacterSet(charactersIn: "?")
 

@@ -69,12 +69,12 @@ internal final class DeprecatedRewardPledgeViewController: UIViewController {
   internal static func configuredWith(
     project: Project,
     reward: Reward,
-    applePayCapable: Bool = PKPaymentAuthorizationViewController.applePayCapable())
+    applePayCapable: Bool = PKPaymentAuthorizationViewController.applePayCapable()
+  )
     -> DeprecatedRewardPledgeViewController {
-
-      let vc = Storyboard.RewardPledge.instantiate(DeprecatedRewardPledgeViewController.self)
-      vc.viewModel.inputs.configureWith(project: project, reward: reward, applePayCapable: applePayCapable)
-      return vc
+    let vc = Storyboard.RewardPledge.instantiate(DeprecatedRewardPledgeViewController.self)
+    vc.viewModel.inputs.configureWith(project: project, reward: reward, applePayCapable: applePayCapable)
+    return vc
   }
 
   deinit {
@@ -102,45 +102,69 @@ internal final class DeprecatedRewardPledgeViewController: UIViewController {
     self.applePayButtonContainerView.addArrangedSubview(self.applePayButton)
 
     self.applePayButton.addTarget(
-      self, action: #selector(self.applePayButtonTapped), for: .touchUpInside
+      self,
+      action: #selector(DeprecatedRewardPledgeViewController.applePayButtonTapped),
+      for: .touchUpInside
     )
     self.cancelPledgeButton.addTarget(
-      self, action: #selector(self.cancelPledgeButtonTapped), for: .touchUpInside
+      self,
+      action: #selector(DeprecatedRewardPledgeViewController.cancelPledgeButtonTapped),
+      for: .touchUpInside
     )
     self.changePaymentMethodButton.addTarget(
-      self, action: #selector(self.changePaymentMethodButtonTapped), for: .touchUpInside
+      self,
+      action: #selector(DeprecatedRewardPledgeViewController.changePaymentMethodButtonTapped),
+      for: .touchUpInside
     )
     self.continueToPaymentButton.addTarget(
-      self, action: #selector(self.continueWithPaymentButtonTapped), for: .touchUpInside
+      self,
+      action: #selector(DeprecatedRewardPledgeViewController.continueWithPaymentButtonTapped),
+      for: .touchUpInside
     )
     self.descriptionLabel.addGestureRecognizer(
-      UITapGestureRecognizer(target: self, action: #selector(self.expandRewardDescriptionTapped))
+      UITapGestureRecognizer(
+        target: self, action: #selector(DeprecatedRewardPledgeViewController.expandRewardDescriptionTapped)
+      )
     )
     self.differentPaymentMethodButton.addTarget(
-      self, action: #selector(self.differentPaymentMethodTapped), for: .touchUpInside
+      self,
+      action: #selector(DeprecatedRewardPledgeViewController.differentPaymentMethodTapped),
+      for: .touchUpInside
     )
     self.disclaimerButton.addTarget(
-      self, action: #selector(self.disclaimerButtonTapped), for: .touchUpInside
-    )
-    self.pledgeTextField.addTarget(
-      self, action: #selector(self.pledgedTextFieldChanged), for: .editingChanged
+      self,
+      action: #selector(DeprecatedRewardPledgeViewController.disclaimerButtonTapped),
+      for: .touchUpInside
     )
     self.pledgeTextField.addTarget(
       self,
-      action: #selector(self.pledgedTextFieldDoneEditing),
+      action: #selector(DeprecatedRewardPledgeViewController.pledgedTextFieldChanged),
+      for: .editingChanged
+    )
+    self.pledgeTextField.addTarget(
+      self,
+      action: #selector(DeprecatedRewardPledgeViewController.pledgedTextFieldDoneEditing),
       for: [.editingDidEndOnExit, .editingDidEnd]
     )
     self.readMoreContainerView.addGestureRecognizer(
-      UITapGestureRecognizer(target: self, action: #selector(self.expandRewardDescriptionTapped))
+      UITapGestureRecognizer(
+        target: self, action: #selector(DeprecatedRewardPledgeViewController.expandRewardDescriptionTapped)
+      )
     )
     self.shippingDestinationButton.addTarget(
-      self, action: #selector(self.shippingButtonTapped), for: .touchUpInside
+      self,
+      action: #selector(DeprecatedRewardPledgeViewController.shippingButtonTapped),
+      for: .touchUpInside
     )
     self.titleLabel.addGestureRecognizer(
-      UITapGestureRecognizer(target: self, action: #selector(self.expandRewardDescriptionTapped))
+      UITapGestureRecognizer(
+        target: self, action: #selector(DeprecatedRewardPledgeViewController.expandRewardDescriptionTapped)
+      )
     )
     self.updatePledgeButton.addTarget(
-      self, action: #selector(self.updatePledgeButtonTapped), for: .touchUpInside
+      self,
+      action: #selector(DeprecatedRewardPledgeViewController.updatePledgeButtonTapped),
+      for: .touchUpInside
     )
 
     self.sessionStartedObserver = NotificationCenter
@@ -400,8 +424,9 @@ internal final class DeprecatedRewardPledgeViewController: UIViewController {
       |> UIStackView.lens.isUserInteractionEnabled .~ false
 
     _ = self.shippingContainerView
-      |> UIView.lens.layoutMargins .~
-      .init(top: Styles.grid(2), left: Styles.grid(2), bottom: Styles.grid(2), right: Styles.grid(4))
+      |> UIView.lens.layoutMargins .~ .init(
+        top: Styles.grid(2), left: Styles.grid(2), bottom: Styles.grid(2), right: Styles.grid(4)
+      )
       |> roundedStyle(cornerRadius: 0)
       |> UIView.lens.layer.borderColor .~ UIColor.ksr_grey_400.cgColor
       |> UIView.lens.layer.borderWidth .~ 1
@@ -549,13 +574,16 @@ internal final class DeprecatedRewardPledgeViewController: UIViewController {
       .observeValues { [weak self] in self?.animateTextViewConstraint($0) }
   }
 
-  fileprivate func goToCheckout(initialRequest: URLRequest,
-                                project: Project,
-                                reward: Reward) {
-
-    let vc = DeprecatedCheckoutViewController.configuredWith(initialRequest: initialRequest,
-                                                             project: project,
-                                                             reward: reward)
+  fileprivate func goToCheckout(
+    initialRequest: URLRequest,
+    project: Project,
+    reward: Reward
+  ) {
+    let vc = DeprecatedCheckoutViewController.configuredWith(
+      initialRequest: initialRequest,
+      project: project,
+      reward: reward
+    )
     self.navigationController?.pushViewController(vc, animated: true)
   }
 
@@ -686,7 +714,6 @@ internal final class DeprecatedRewardPledgeViewController: UIViewController {
 }
 
 extension DeprecatedRewardPledgeViewController: PKPaymentAuthorizationViewControllerDelegate {
-
   internal func paymentAuthorizationViewControllerWillAuthorizePayment(
     _: PKPaymentAuthorizationViewController
   ) {

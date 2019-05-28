@@ -13,7 +13,7 @@ final class ProjectPamphletContentDataSourceTests: TestCase {
     self.dataSource.load(project: project)
 
     let section = ProjectPamphletContentDataSource.Section.calloutReward.rawValue
-    XCTAssertTrue(dataSource.indexPathIsPledgeAnyAmountCell(.init(row: 0, section: section)))
+    XCTAssertTrue(self.dataSource.indexPathIsPledgeAnyAmountCell(.init(row: 0, section: section)))
   }
 
   func testSubpages_NoLiveStreams() {

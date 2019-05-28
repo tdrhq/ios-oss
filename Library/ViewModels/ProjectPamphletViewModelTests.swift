@@ -3,6 +3,7 @@
 import Prelude
 import ReactiveExtensions_TestHelpers
 import ReactiveSwift
+import Result
 import XCTest
 
 final class ProjectPamphletViewModelTests: TestCase {
