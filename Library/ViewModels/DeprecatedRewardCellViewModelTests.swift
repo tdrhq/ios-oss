@@ -330,7 +330,7 @@ final class DeprecatedRewardCellViewModelTests: TestCase {
     self.estimatedDeliveryDateLabelText.assertValues([
       Format.date(
         secondsInUTC: estimatedDelivery,
-        template: "MMMMyyyy",
+        template: DateFormatter.monthYear,
         timeZone: UTCTimeZone
       )
     ], "Emits the estimated delivery date")
