@@ -8,7 +8,7 @@ import Result
 import XCTest
 
 final class DeprecatedRewardCellViewModelTests: TestCase {
-  fileprivate let vm: RewardCellViewModelType = DeprecatedRewardCellViewModel()
+  fileprivate let vm: DeprecatedRewardCellViewModelType = DeprecatedRewardCellViewModel()
 
   fileprivate let allGoneHidden = TestObserver<Bool, Never>()
   fileprivate let conversionLabelHidden = TestObserver<Bool, Never>()
