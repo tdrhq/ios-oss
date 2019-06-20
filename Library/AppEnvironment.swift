@@ -46,23 +46,29 @@ public struct AppEnvironment: AppEnvironmentType {
   }
 
   public static func updateServerConfig(_ config: ServerConfigType) {
-    let service = Service(serverConfig: config)
+    let debugServiceOverride = AppEnvironment.current.debugConfig?.serverConfig
 
-    replaceCurrentEnvironment(
+    let service = Service(serverConfig: debugServiceOverride ?? config)
+
+    self.replaceCurrentEnvironment(
       apiService: service
     )
   }
 
   public static func updateConfig(_ config: Config) {
+    let debugConfigOverride = AppEnvironment.current.debugConfig?.config
+    let preferredConfig = debugConfigOverride ?? config
+
     self.replaceCurrentEnvironment(
-      config: config,
-      countryCode: config.countryCode,
-      koala: AppEnvironment.current.koala |> Koala.lens.config .~ config
+      config: preferredConfig,
+      countryCode: preferredConfig.countryCode,
+      koala: AppEnvironment.current.koala |> Koala.lens.config .~ preferredConfig
     )
   }
 
   public static func updateLanguage(_ language: Language) {
-    self.replaceCurrentEnvironment(language: language)
+    let debugLanguageOverride = AppEnvironment.current.debugConfig?.language
+    self.replaceCurrentEnvironment(language: debugLanguageOverride ?? language)
   }
 
   // Invoke when you want to end the user's session.
@@ -124,6 +130,7 @@ public struct AppEnvironment: AppEnvironmentType {
     currentUser: User? = AppEnvironment.current.currentUser,
     dateType: DateProtocol.Type = AppEnvironment.current.dateType,
     debounceInterval: DispatchTimeInterval = AppEnvironment.current.debounceInterval,
+    debugConfig: DebugConfigData? = AppEnvironment.current.debugConfig,
     device: UIDeviceType = AppEnvironment.current.device,
     facebookAppDelegate: FacebookAppDelegateProtocol = AppEnvironment.current.facebookAppDelegate,
     isOSVersionAvailable: @escaping ((Double) -> Bool) = AppEnvironment.current.isOSVersionAvailable,
@@ -153,6 +160,7 @@ public struct AppEnvironment: AppEnvironmentType {
         currentUser: currentUser,
         dateType: dateType,
         debounceInterval: debounceInterval,
+        debugConfig: debugConfig,
         device: device,
         facebookAppDelegate: facebookAppDelegate,
         isOSVersionAvailable: isOSVersionAvailable,
@@ -186,6 +194,7 @@ public struct AppEnvironment: AppEnvironmentType {
     currentUser: User? = AppEnvironment.current.currentUser,
     dateType: DateProtocol.Type = AppEnvironment.current.dateType,
     debounceInterval: DispatchTimeInterval = AppEnvironment.current.debounceInterval,
+    debugConfig: DebugConfigData? = AppEnvironment.current.debugConfig,
     device: UIDeviceType = AppEnvironment.current.device,
     facebookAppDelegate: FacebookAppDelegateProtocol = AppEnvironment.current.facebookAppDelegate,
     isOSVersionAvailable: @escaping ((Double) -> Bool) = AppEnvironment.current.isOSVersionAvailable,
@@ -215,6 +224,7 @@ public struct AppEnvironment: AppEnvironmentType {
         currentUser: currentUser,
         dateType: dateType,
         debounceInterval: debounceInterval,
+        debugConfig: debugConfig,
         device: device,
         facebookAppDelegate: facebookAppDelegate,
         isOSVersionAvailable: isOSVersionAvailable,

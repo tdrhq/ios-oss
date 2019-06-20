@@ -211,6 +211,7 @@ internal final class BetaToolsViewController: UITableViewController {
   }
 
   private func updateLanguage(language: Language) {
+    AppEnvironment.replaceCurrentEnvironment(debugConfig: DebugConfigData.replacing(language: language))
     AppEnvironment.updateLanguage(language)
 
     NotificationCenter.default.post(
@@ -225,6 +226,9 @@ internal final class BetaToolsViewController: UITableViewController {
   private func updateEnvironment(environment: EnvironmentType) {
     let serverConfig = ServerConfig.config(for: environment)
 
+    AppEnvironment.replaceCurrentEnvironment(
+      debugConfig: DebugConfigData.replacing(serverConfig: serverConfig)
+    )
     AppEnvironment.updateServerConfig(serverConfig)
 
     self.viewModel.inputs.didUpdateEnvironment()

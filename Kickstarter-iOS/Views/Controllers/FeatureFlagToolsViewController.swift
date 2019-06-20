@@ -56,6 +56,7 @@ final class FeatureFlagToolsViewController: UITableViewController {
 
     let updatedConfig = config |> \.features .~ features
 
+    AppEnvironment.replaceCurrentEnvironment(debugConfig: DebugConfigData.replacing(config: config))
     AppEnvironment.updateConfig(updatedConfig)
 
     self.viewModel.inputs.didUpdateConfig()

@@ -4,6 +4,26 @@ import Prelude
 import ReactiveExtensions
 import ReactiveSwift
 
+public struct DebugConfigData {
+  var config: Config?
+  var language: Language?
+  var serverConfig: ServerConfigType?
+
+  public static func replacing(
+    config: Config? = nil,
+    language: Language? = nil,
+    serverConfig: ServerConfigType? = nil
+  ) -> DebugConfigData {
+    var currentDebugConfig = AppEnvironment.current.debugConfig ?? DebugConfigData()
+
+    currentDebugConfig.config = config
+    currentDebugConfig.language = language
+    currentDebugConfig.serverConfig = serverConfig
+
+    return currentDebugConfig
+  }
+}
+
 public enum BetaToolsRow: Int, CaseIterable {
   case debugFeatureFlags
   case debugPushNotifications

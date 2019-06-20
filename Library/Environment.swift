@@ -44,6 +44,9 @@ public struct Environment {
   /// The amount of time to debounce signals by. Default value is `0.3`.
   public let debounceInterval: DispatchTimeInterval
 
+  /// A type that holds overridden configuration values for use in debugging.
+  public let debugConfig: DebugConfigData?
+
   /// The current device running the app.
   public let device: UIDeviceType
 
@@ -109,6 +112,7 @@ public struct Environment {
     currentUser: User? = nil,
     dateType: DateProtocol.Type = Date.self,
     debounceInterval: DispatchTimeInterval = .milliseconds(300),
+    debugConfig: DebugConfigData? = nil,
     device: UIDeviceType = UIDevice.current,
     environmentVariables: EnvironmentVariables = EnvironmentVariables(),
     facebookAppDelegate: FacebookAppDelegateProtocol = FBSDKApplicationDelegate.sharedInstance(),
@@ -137,6 +141,7 @@ public struct Environment {
     self.currentUser = currentUser
     self.dateType = dateType
     self.debounceInterval = debounceInterval
+    self.debugConfig = debugConfig
     self.device = device
     self.environmentVariables = environmentVariables
     self.facebookAppDelegate = facebookAppDelegate
