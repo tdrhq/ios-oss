@@ -57,12 +57,14 @@ final class RewardsCollectionViewModelTests: TestCase {
     self.goToPledgeProject.assertDidNotEmitValue()
     self.goToPledgeReward.assertDidNotEmitValue()
     self.goToPledgeRefTag.assertDidNotEmitValue()
+    XCTAssertNil(self.vm.outputs.selectedReward())
 
     self.vm.inputs.rewardSelected(with: firstRewardId)
 
     self.goToPledgeProject.assertValues([project])
     self.goToPledgeReward.assertValues([project.rewards[0]])
     self.goToPledgeRefTag.assertValues([.activity])
+    XCTAssertEqual(self.vm.outputs.selectedReward(), project.rewards[0])
 
     let lastCardRewardId = project.rewards.last!.id
     let endIndex = project.rewards.endIndex
@@ -72,5 +74,6 @@ final class RewardsCollectionViewModelTests: TestCase {
     self.goToPledgeProject.assertValues([project, project])
     self.goToPledgeReward.assertValues([project.rewards[0], project.rewards[endIndex - 1]])
     self.goToPledgeRefTag.assertValues([.activity, .activity])
+    XCTAssertEqual(self.vm.outputs.selectedReward(), project.rewards[endIndex - 1])
   }
 }
