@@ -62,6 +62,7 @@ internal final class DeprecatedRewardPledgeViewModelTests: TestCase {
   fileprivate let pledgeCurrencyLabelText = TestObserver<String, Never>()
   fileprivate let pledgeIsLoading = TestObserver<Bool, Never>()
   fileprivate let pledgeTextFieldText = TestObserver<String, Never>()
+  fileprivate let popToRootViewController = TestObserver<(), Never>()
   fileprivate let readMoreContainerViewHidden = TestObserver<Bool, Never>()
   fileprivate let setStripeAppleMerchantIdentifier = TestObserver<String, Never>()
   fileprivate let setStripePublishableKey = TestObserver<String, Never>()
@@ -120,6 +121,7 @@ internal final class DeprecatedRewardPledgeViewModelTests: TestCase {
     self.vm.outputs.pledgeCurrencyLabelText.observe(self.pledgeCurrencyLabelText.observer)
     self.vm.outputs.pledgeIsLoading.observe(self.pledgeIsLoading.observer)
     self.vm.outputs.pledgeTextFieldText.observe(self.pledgeTextFieldText.observer)
+    self.vm.outputs.popToRootViewController.observe(self.popToRootViewController.observer)
     self.vm.outputs.readMoreContainerViewHidden.observe(self.readMoreContainerViewHidden.observer)
     self.vm.outputs.setStripeAppleMerchantIdentifier.observe(self.setStripeAppleMerchantIdentifier.observer)
     self.vm.outputs.setStripePublishableKey.observe(self.setStripePublishableKey.observer)
@@ -2765,5 +2767,21 @@ internal final class DeprecatedRewardPledgeViewModelTests: TestCase {
     self.vm.inputs.viewDidLoad()
 
     self.shippingLocationsLabelText.assertValues([""])
+  }
+
+  func testTrackClosedRewardOnBack() {
+    self.vm.inputs.configureWith(project: .template, reward: .template, applePayCapable: false)
+    self.vm.inputs.viewDidLoad()
+
+    XCTAssertEqual(["Reward Checkout", "Selected Reward"], self.trackingClient.events)
+
+    // moving a non-nil VC does not track
+    self.vm.inputs.willMove(toParent: UIViewController())
+
+    XCTAssertEqual(["Reward Checkout", "Selected Reward"], self.trackingClient.events)
+
+    self.vm.inputs.willMove(toParent: nil)
+
+    XCTAssertEqual(["Reward Checkout", "Selected Reward", "Closed Reward"], self.trackingClient.events)
   }
 }

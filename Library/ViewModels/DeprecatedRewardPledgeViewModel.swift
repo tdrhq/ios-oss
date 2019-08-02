@@ -69,6 +69,9 @@ public protocol DeprecatedRewardPledgeViewModelInputs {
 
   /// Call when the view loads.
   func viewDidLoad()
+
+  /// Call when the vc will move to parent.
+  func willMove(toParent parent: UIViewController?)
 }
 
 public protocol DeprecatedRewardPledgeViewModelOutputs {
@@ -162,6 +165,9 @@ public protocol DeprecatedRewardPledgeViewModelOutputs {
 
   /// Emits a string to be put into the pledge text field.
   var pledgeTextFieldText: Signal<String, Never> { get }
+
+  /// Emits when the stack should be popped.
+  var popToRootViewController: Signal<(), Never> { get }
 
   /// Emits a boolean when the read more container should be hidden.
   var readMoreContainerViewHidden: Signal<Bool, Never> { get }
@@ -624,6 +630,10 @@ public final class DeprecatedRewardPledgeViewModel: Type, Inputs, Outputs {
       self.errorAlertTappedShouldDismissProperty.signal.filter(isTrue).ignoreValues()
     )
 
+    self.popToRootViewController = self.errorAlertTappedShouldDismissProperty.signal
+      .filter(isTrue)
+      .ignoreValues()
+
     let projectAndRewardAndPledgeContext = projectAndReward
       .map { project, reward -> (Project, Reward, Koala.PledgeContext) in
         (
@@ -697,8 +707,13 @@ public final class DeprecatedRewardPledgeViewModel: Type, Inputs, Outputs {
         self?.rewardViewModel.inputs.boundStyles()
       }
 
+    let isDismissing = Signal.merge(
+      self.willMoveToParentProperty.signal.filter(isNil).ignoreValues(),
+      self.closeButtonTappedProperty.signal
+    )
+
     projectAndRewardAndPledgeContext
-      .takeWhen(self.closeButtonTappedProperty.signal)
+      .takeWhen(isDismissing)
       .observeValues {
         AppEnvironment.current.koala.trackClosedReward(project: $0, reward: $1, pledgeContext: $2)
       }
@@ -885,6 +900,11 @@ public final class DeprecatedRewardPledgeViewModel: Type, Inputs, Outputs {
     self.viewDidLoadProperty.value = ()
   }
 
+  fileprivate let willMoveToParentProperty = MutableProperty<UIViewController?>(nil)
+  public func willMove(toParent parent: UIViewController?) {
+    self.willMoveToParentProperty.value = parent
+  }
+
   public let applePayButtonHidden: Signal<Bool, Never>
   public let continueToPaymentsButtonHidden: Signal<Bool, Never>
   public var conversionLabelHidden: Signal<Bool, Never> {
@@ -922,22 +942,23 @@ public final class DeprecatedRewardPledgeViewModel: Type, Inputs, Outputs {
     return self.rewardViewModel.outputs.minimumLabelText
   }
 
-  public let navigationTitle: Signal<String, NoError>
-  public let orLabelHidden: Signal<Bool, NoError>
-  public let paddingViewHeightConstant: Signal<CGFloat, NoError>
-  public let pledgeCurrencyLabelText: Signal<String, NoError>
-  public let pledgeIsLoading: Signal<Bool, NoError>
-  public let pledgeTextFieldText: Signal<String, NoError>
-  public let readMoreContainerViewHidden: Signal<Bool, NoError>
-  public let setStripeAppleMerchantIdentifier: Signal<String, NoError>
-  public let setStripePublishableKey: Signal<String, NoError>
-  public let shippingAmountLabelText: Signal<String, NoError>
-  public let shippingInputStackViewHidden: Signal<Bool, NoError>
-  public let shippingIsLoading: Signal<Bool, NoError>
-  public let shippingLocationsLabelText: Signal<String, NoError>
-  public let shippingStackViewHidden: Signal<Bool, NoError>
-  public let showAlert: Signal<(message: String, shouldDismiss: Bool), NoError>
-  public var titleLabelHidden: Signal<Bool, NoError> {
+  public let navigationTitle: Signal<String, Never>
+  public let orLabelHidden: Signal<Bool, Never>
+  public let paddingViewHeightConstant: Signal<CGFloat, Never>
+  public let pledgeCurrencyLabelText: Signal<String, Never>
+  public let pledgeIsLoading: Signal<Bool, Never>
+  public let pledgeTextFieldText: Signal<String, Never>
+  public let popToRootViewController: Signal<(), Never>
+  public let readMoreContainerViewHidden: Signal<Bool, Never>
+  public let setStripeAppleMerchantIdentifier: Signal<String, Never>
+  public let setStripePublishableKey: Signal<String, Never>
+  public let shippingAmountLabelText: Signal<String, Never>
+  public let shippingInputStackViewHidden: Signal<Bool, Never>
+  public let shippingIsLoading: Signal<Bool, Never>
+  public let shippingLocationsLabelText: Signal<String, Never>
+  public let shippingStackViewHidden: Signal<Bool, Never>
+  public let showAlert: Signal<(message: String, shouldDismiss: Bool), Never>
+  public var titleLabelHidden: Signal<Bool, Never> {
     return self.rewardViewModel.outputs.titleLabelHidden
   }
 
