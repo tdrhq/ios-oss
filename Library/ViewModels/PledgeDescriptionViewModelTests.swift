@@ -2,7 +2,6 @@
 @testable import Library
 import Prelude
 import ReactiveExtensions_TestHelpers
-import Result
 import XCTest
 
 internal final class PledgeDescriptionViewModelTests: TestCase {

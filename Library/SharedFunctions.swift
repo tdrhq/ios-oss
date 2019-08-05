@@ -163,15 +163,6 @@ public func ksr_is1PasswordSupported() -> Bool {
   return true
 }
 
-public func updatedUserWithClearedActivityCountProducer() -> SignalProducer<User, Never> {
-  return AppEnvironment.current.apiService.clearUserUnseenActivity(input: .init())
-    .filter { _ in AppEnvironment.current.currentUser != nil }
-    .map { $0.activityIndicatorCount }
-    .map { count in AppEnvironment.current.currentUser ?|> User.lens.unseenActivityCount .~ count }
-    .skipNil()
-    .demoteErrors()
-}
-
 public func defaultShippingRule(fromShippingRules shippingRules: [ShippingRule]) -> ShippingRule? {
   let shippingRuleFromCurrentLocation = shippingRules
     .filter { shippingRule in shippingRule.location.country == AppEnvironment.current.config?.countryCode }

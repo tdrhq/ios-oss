@@ -3,7 +3,6 @@
 import PassKit
 import Prelude
 import ReactiveExtensions_TestHelpers
-import Result
 import XCTest
 
 // swiftlint:disable force_unwrapping

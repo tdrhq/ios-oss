@@ -2,7 +2,6 @@ import KsApi
 import PassKit
 import Prelude
 import ReactiveSwift
-
 public protocol DeprecatedRewardPledgeViewModelInputs {
   /// Call when the apple pay button is tapped.
   func applePayButtonTapped()
@@ -911,34 +910,34 @@ public final class DeprecatedRewardPledgeViewModel: Type, Inputs, Outputs {
     return self.rewardViewModel.outputs.conversionLabelHidden
   }
 
-  public var conversionLabelText: Signal<String, NoError> {
+  public var conversionLabelText: Signal<String, Never> {
     return self.rewardViewModel.outputs.conversionLabelText
   }
 
-  public let countryLabelText: Signal<String, NoError>
-  public var descriptionLabelText: Signal<String, NoError> {
+  public let countryLabelText: Signal<String, Never>
+  public var descriptionLabelText: Signal<String, Never> {
     return self.rewardViewModel.outputs.descriptionLabelText
   }
 
-  public let differentPaymentMethodButtonHidden: Signal<Bool, NoError>
-  public let dismissViewController: Signal<(), NoError>
-  public let estimatedDeliveryDateLabelText: Signal<String, NoError>
-  public let estimatedFulfillmentStackViewHidden: Signal<Bool, NoError>
-  public let expandRewardDescription: Signal<(), NoError>
-  public let fulfillmentAndShippingFooterStackViewHidden: Signal<Bool, NoError>
-  public let goToCheckout: Signal<(URLRequest, Project, Reward), NoError>
-  public let goToLoginTout: Signal<(), NoError>
-  public let goToPaymentAuthorization: Signal<PKPaymentRequest, NoError>
-  public let goToShippingPicker: Signal<(Project, [ShippingRule], ShippingRule), NoError>
-  public let goToThanks: Signal<Project, NoError>
-  public let goToTrustAndSafety: Signal<(), NoError>
-  public var items: Signal<[String], NoError> {
+  public let differentPaymentMethodButtonHidden: Signal<Bool, Never>
+  public let dismissViewController: Signal<(), Never>
+  public let estimatedDeliveryDateLabelText: Signal<String, Never>
+  public let estimatedFulfillmentStackViewHidden: Signal<Bool, Never>
+  public let expandRewardDescription: Signal<(), Never>
+  public let fulfillmentAndShippingFooterStackViewHidden: Signal<Bool, Never>
+  public let goToCheckout: Signal<(URLRequest, Project, Reward), Never>
+  public let goToLoginTout: Signal<(), Never>
+  public let goToPaymentAuthorization: Signal<PKPaymentRequest, Never>
+  public let goToShippingPicker: Signal<(Project, [ShippingRule], ShippingRule), Never>
+  public let goToThanks: Signal<Project, Never>
+  public let goToTrustAndSafety: Signal<(), Never>
+  public var items: Signal<[String], Never> {
     return self.rewardViewModel.outputs.items
   }
 
-  public let itemsContainerHidden: Signal<Bool, NoError>
-  public let loadingOverlayIsHidden: Signal<Bool, NoError>
-  public var minimumLabelText: Signal<String, NoError> {
+  public let itemsContainerHidden: Signal<Bool, Never>
+  public let loadingOverlayIsHidden: Signal<Bool, Never>
+  public var minimumLabelText: Signal<String, Never> {
     return self.rewardViewModel.outputs.minimumLabelText
   }
 
@@ -961,8 +960,6 @@ public final class DeprecatedRewardPledgeViewModel: Type, Inputs, Outputs {
   public var titleLabelHidden: Signal<Bool, Never> {
     return self.rewardViewModel.outputs.titleLabelHidden
   }
-
-  public let titleLabelText: Signal<String, NoError>
 
   public let titleLabelText: Signal<String, Never>
 

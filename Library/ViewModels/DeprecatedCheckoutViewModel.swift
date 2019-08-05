@@ -4,7 +4,6 @@ import PassKit
 import Prelude
 import ReactiveExtensions
 import ReactiveSwift
-import Result
 import Runes
 
 public protocol DeprecatedCheckoutViewModelInputs {
@@ -406,7 +405,7 @@ public final class DeprecatedCheckoutViewModel: DeprecatedCheckoutViewModelType 
     return self.checkoutRacingViewModel.outputs.showAlert
   }
 
-  public let webViewLoadRequest: Signal<URLRequest, NoError>
+  public let webViewLoadRequest: Signal<URLRequest, Never>
 
   public var inputs: DeprecatedCheckoutViewModelInputs { return self }
   public var outputs: DeprecatedCheckoutViewModelOutputs { return self }

@@ -1,7 +1,6 @@
 import KsApi
 import Prelude
 import ReactiveSwift
-
 public protocol ProjectPamphletViewModelInputs {
   /// Call when "Back this project" is tapped
   func backThisProjectTapped()
@@ -26,8 +25,7 @@ public protocol ProjectPamphletViewModelInputs {
 
 public protocol ProjectPamphletViewModelOutputs {
   /// Emits a project that should be used to configure all children view controllers.
-  var configureChildViewControllersWithProjectAndLiveStreams: Signal<(Project, [LiveStreamEvent],
-    RefTag?), NoError> { get }
+  var configureChildViewControllersWithProject: Signal<(Project, RefTag?), Never> { get }
 
   /// Emits a (project, isLoading) tuple used to configure the pledge CTA view
   var configurePledgeCTAView: Signal<(Project, Bool), Never> { get }
@@ -260,7 +258,7 @@ private func cookieFrom(refTag: RefTag, project: Project) -> HTTPCookie? {
 }
 
 private func fetchProject(projectOrParam: Either<Project, Param>, shouldPrefix: Bool)
-  -> SignalProducer<Project, NoError> {
+  -> SignalProducer<Project, Never> {
   let param = projectOrParam.ifLeft({ Param.id($0.id) }, ifRight: id)
 
   let projectProducer = AppEnvironment.current.apiService.fetchProject(param: param)
