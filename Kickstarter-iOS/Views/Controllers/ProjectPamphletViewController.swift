@@ -93,6 +93,10 @@ public final class ProjectPamphletViewController: UIViewController {
       self, action: #selector(ProjectPamphletViewController.backThisProjectTapped), for: .touchUpInside
     )
 
+    self.pledgeCTAContainerView.pledgeRetryButton.addTarget(
+      self, action: #selector(ProjectPamphletViewController.pledgeRetryButtonTapped), for: .touchUpInside
+    )
+
     // Configure constraints
     let pledgeCTAContainerViewConstraints = [
       self.pledgeCTAContainerView.leftAnchor.constraint(equalTo: self.view.leftAnchor),
@@ -197,6 +201,10 @@ public final class ProjectPamphletViewController: UIViewController {
   // MARK: - Selectors
 
   @objc func backThisProjectTapped() {
+    self.viewModel.inputs.backThisProjectTapped()
+  }
+
+  @objc func pledgeRetryButtonTapped() {
     self.viewModel.inputs.backThisProjectTapped()
   }
 }
