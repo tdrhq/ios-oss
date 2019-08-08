@@ -3,6 +3,12 @@ import Library
 import Prelude
 import UIKit
 
+private enum Layout {
+  enum CTAContainerView {
+    static let minHeight: CGFloat = 130
+  }
+}
+
 public protocol ProjectPamphletViewControllerDelegate: AnyObject {
   func projectPamphlet(
     _ controller: ProjectPamphletViewController,
@@ -205,7 +211,7 @@ public final class ProjectPamphletViewController: UIViewController {
   }
 
   @objc func pledgeRetryButtonTapped() {
-    self.viewModel.inputs.backThisProjectTapped()
+    self.viewModel.inputs.pledgeRetryButtonTapped()
   }
 }
 
