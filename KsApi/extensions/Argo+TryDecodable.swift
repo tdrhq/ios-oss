@@ -4,17 +4,17 @@ import Foundation
 extension Argo.JSON {
   func toPrimitive() -> Any? {
     switch self {
-    case .array(let json):
+    case let .array(json):
       return json.map { $0.toPrimitive() }
-    case .bool(let bool):
+    case let .bool(bool):
       return bool
     case .null:
       return nil
-    case .number(let number):
+    case let .number(number):
       return number
-    case .object(let dict):
+    case let .object(dict):
       return dict.mapValues { $0.toPrimitive() }
-    case .string(let string):
+    case let .string(string):
       return string
     }
   }
@@ -24,12 +24,12 @@ public func tryDecodable<T: Swift.Decodable>(_ json: Argo.JSON?) -> Argo.Decoded
   guard
     let primitive = json?.toPrimitive(),
     let data = try? JSONSerialization.data(withJSONObject: primitive, options: [])
-    else { return .success(nil) }
+  else { return .success(nil) }
 
   do {
     let value = try JSONDecoder().decode(T?.self, from: data)
     return .success(value)
-  } catch let error {
+  } catch {
     return .failure(.custom("\(error)"))
   }
 }
@@ -38,12 +38,12 @@ public func tryDecodable<T: Swift.Decodable>(_ json: JSON) -> Decoded<T> {
   guard
     let primitive = json.toPrimitive(),
     let data = try? JSONSerialization.data(withJSONObject: primitive, options: [])
-    else { return .failure(.custom("Invalid JSON data")) }
+  else { return .failure(.custom("Invalid JSON data")) }
 
   do {
     let value = try JSONDecoder().decode(T.self, from: data)
     return .success(value)
-  } catch let error {
+  } catch {
     return .failure(.custom(error.localizedDescription))
   }
 }

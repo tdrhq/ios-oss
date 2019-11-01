@@ -88,6 +88,7 @@ extension Reward.Shipping: Swift.Decodable {
     self.type = try container.decodeIfPresent(ShippingType.self, forKey: .type)
   }
 }
+
 extension Reward.Shipping.Location: Swift.Decodable {}
 extension Reward.Shipping.Preference: Swift.Decodable {}
 extension Reward.Shipping.ShippingType: Swift.Decodable {}

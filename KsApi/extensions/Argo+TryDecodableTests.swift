@@ -1,11 +1,3 @@
-//
-//  Argo+TryDecodableTests.swift
-//  Library-iOSTests
-//
-//  Created by Justin Swart on 11/1/19.
-//  Copyright © 2019 Kickstarter. All rights reserved.
-//
-
 import Argo
 @testable import KsApi
 import XCTest
@@ -41,7 +33,7 @@ final class Argo_TryDecodableTests: XCTestCase {
     XCTAssertEqual((reversedDictionary["d"] as? [String])?[0], "d-string1")
     XCTAssertEqual((reversedDictionary["d"] as? [String])?[1], "d-string2")
     XCTAssertEqual((reversedDictionary["d"] as? [String])?[2], "d-string3")
-    XCTAssertEqual((reversedDictionary["e"] as? Int), 3)
-    XCTAssertEqual((reversedDictionary["f"] as? Bool), false)
+    XCTAssertEqual(reversedDictionary["e"] as? Int, 3)
+    XCTAssertEqual(reversedDictionary["f"] as? Bool, false)
   }
 }
