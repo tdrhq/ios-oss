@@ -30,9 +30,22 @@ public struct Reward {
     public let summary: String?
     public let type: ShippingType?
 
+    private enum CodingKeys: String, CodingKey {
+      case enabled = "shipping_enabled"
+      case location = "shipping_single_location"
+      case preference = "shipping_preference"
+      case summary = "shipping_summary"
+      case type = "shipping_type"
+    }
+
     public struct Location: Equatable {
       public let id: Int
       public let localizedName: String
+
+      private enum CodingKeys: String, CodingKey {
+        case id
+        case localizedName = "localized_name"
+      }
     }
 
     public enum Preference: String {
@@ -62,6 +75,25 @@ public func < (lhs: Reward, rhs: Reward) -> Bool {
   return minimumAndIdComparator.isOrdered(lhs, rhs)
 }
 
+// MARK: - Swift.Decodable
+
+extension Reward.Shipping: Swift.Decodable {
+  public init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+
+    self.enabled = try container.decodeIfPresent(Bool.self, forKey: .enabled) ?? false
+    self.location = try container.decodeIfPresent(Location.self, forKey: .location)
+    self.preference = try container.decodeIfPresent(Preference.self, forKey: .preference)
+    self.summary = try container.decodeIfPresent(String.self, forKey: .summary)
+    self.type = try container.decodeIfPresent(ShippingType.self, forKey: .type)
+  }
+}
+extension Reward.Shipping.Location: Swift.Decodable {}
+extension Reward.Shipping.Preference: Swift.Decodable {}
+extension Reward.Shipping.ShippingType: Swift.Decodable {}
+
+// MARK: - Argo.Decodable
+
 extension Reward: Argo.Decodable {
   public static func decode(_ json: JSON) -> Decoded<Reward> {
     let tmp1 = curry(Reward.init)
@@ -77,33 +109,11 @@ extension Reward: Argo.Decodable {
       <*> json <|? "remaining"
     return tmp2
       <*> ((json <|| "rewards_items") <|> .success([]))
-      <*> Reward.Shipping.decode(json)
+      <*> tryDecodable(json)
       <*> json <|? "starts_at"
       <*> json <|? "title"
   }
 }
-
-extension Reward.Shipping: Argo.Decodable {
-  public static func decode(_ json: JSON) -> Decoded<Reward.Shipping> {
-    return curry(Reward.Shipping.init)
-      <^> (json <| "shipping_enabled" <|> .success(false))
-      <*> json <|? "shipping_single_location"
-      <*> json <|? "shipping_preference"
-      <*> json <|? "shipping_summary"
-      <*> json <|? "shipping_type"
-  }
-}
-
-extension Reward.Shipping.Location: Argo.Decodable {
-  public static func decode(_ json: JSON) -> Decoded<Reward.Shipping.Location> {
-    return curry(Reward.Shipping.Location.init)
-      <^> json <| "id"
-      <*> json <| "localized_name"
-  }
-}
-
-extension Reward.Shipping.Preference: Argo.Decodable {}
-extension Reward.Shipping.ShippingType: Argo.Decodable {}
 
 extension Reward: GraphIDBridging {
   public static var modelName: String {
