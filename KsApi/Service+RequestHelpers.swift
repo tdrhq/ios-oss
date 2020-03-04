@@ -4,6 +4,8 @@ import Prelude
 import ReactiveExtensions
 import ReactiveSwift
 
+// MARK: - Argo.Decodable
+
 extension Service {
   private static let session = URLSession(configuration: .default)
 
@@ -149,5 +151,121 @@ extension Service {
       uploading: properties.file.map { ($1, $0.rawValue) }
     )
     .flatMap(self.decodeModel)
+  }
+}
+
+// MARK: - Swift.Decodable
+
+extension Service {
+  func requestPagination<M: Swift.Decodable>(_ paginationUrl: String)
+    -> SignalProducer<M, ErrorEnvelope> {
+    guard let paginationUrl = URL(string: paginationUrl) else {
+      return .init(error: .invalidPaginationUrl)
+    }
+
+    return Service.session.rac_dataResponse(preparedRequest(forURL: paginationUrl))
+      .flatMap(self.decodeDecodableModel)
+  }
+
+  func request<M: Swift.Decodable>(_ route: Route)
+    -> SignalProducer<M, ErrorEnvelope> {
+    let properties = route.requestProperties
+
+    guard let URL = URL(string: properties.path, relativeTo: self.serverConfig.apiBaseUrl as URL) else {
+      fatalError(
+        "URL(string: \(properties.path), relativeToURL: \(self.serverConfig.apiBaseUrl)) == nil"
+      )
+    }
+
+    return Service.session.rac_dataResponse(
+      preparedRequest(forURL: URL, method: properties.method, query: properties.query),
+      uploading: properties.file.map { ($1, $0.rawValue) }
+    )
+    .flatMap(self.decodeDecodableModel)
+  }
+
+  func request<M: Swift.Decodable>(_ route: Route)
+    -> SignalProducer<[M], ErrorEnvelope> {
+    let properties = route.requestProperties
+
+    guard let URL = URL(string: properties.path, relativeTo: self.serverConfig.apiBaseUrl as URL) else {
+      fatalError(
+        "URL(string: \(properties.path), relativeToURL: \(self.serverConfig.apiBaseUrl)) == nil"
+      )
+    }
+
+    return Service.session.rac_dataResponse(
+      preparedRequest(forURL: URL, method: properties.method, query: properties.query),
+      uploading: properties.file.map { ($1, $0.rawValue) }
+    )
+    .flatMap(self.decodeDecodableModels)
+  }
+
+  func request<M: Swift.Decodable>(_ route: Route)
+    -> SignalProducer<M?, ErrorEnvelope> {
+    let properties = route.requestProperties
+
+    guard let URL = URL(string: properties.path, relativeTo: self.serverConfig.apiBaseUrl as URL) else {
+      fatalError(
+        "URL(string: \(properties.path), relativeToURL: \(self.serverConfig.apiBaseUrl)) == nil"
+      )
+    }
+
+    return Service.session.rac_dataResponse(
+      preparedRequest(forURL: URL, method: properties.method, query: properties.query),
+      uploading: properties.file.map { ($1, $0.rawValue) }
+    )
+    .flatMap(self.tryDecodeDecodableModel)
+  }
+
+  private func decodeDecodableModel<T: Swift.Decodable>(_ jsonData: Data)
+    -> SignalProducer<T, ErrorEnvelope> {
+    return SignalProducer(value: jsonData)
+      .flatMap { data -> SignalProducer<T, ErrorEnvelope> in
+        do {
+          let decodedObject = try JSONDecoder().decode(GraphResponse<T>.self, from: data)
+
+          print("🔵 [KsApi] Successfully Decoded Data")
+
+          return .init(value: decodedObject.data)
+        } catch {
+          print("🔴 [KsApi] Failure - Decoding error: \(error.localizedDescription)")
+          return .init(error: .couldNotDecodeJSON(.custom(error.localizedDescription)))
+        }
+      }
+  }
+
+  private func decodeDecodableModels<T: Swift.Decodable>(_ jsonData: Data)
+    -> SignalProducer<[T], ErrorEnvelope> {
+    return SignalProducer(value: jsonData)
+      .flatMap { data -> SignalProducer<[T], ErrorEnvelope> in
+        do {
+          let decodedObject = try JSONDecoder().decode(GraphResponse<[T]>.self, from: data)
+
+          print("🔵 [KsApi] Successfully Decoded Data")
+
+          return .init(value: decodedObject.data)
+        } catch {
+          print("🔴 [KsApi] Failure - Decoding error: \(error.localizedDescription)")
+          return .init(error: .couldNotDecodeJSON(.custom(error.localizedDescription)))
+        }
+      }
+  }
+
+  private func tryDecodeDecodableModel<T: Swift.Decodable>(_ jsonData: Data)
+    -> SignalProducer<T?, ErrorEnvelope> {
+    return SignalProducer(value: jsonData)
+      .flatMap { data -> SignalProducer<T?, ErrorEnvelope> in
+        do {
+          let decodedObject = try JSONDecoder().decode(GraphResponse<T?>.self, from: data)
+
+          print("🔵 [KsApi] Successfully Decoded Data")
+
+          return .init(value: decodedObject.data)
+        } catch {
+          print("🔴 [KsApi] Failure - Decoding error: \(error.localizedDescription)")
+          return .init(error: .couldNotDecodeJSON(.custom(error.localizedDescription)))
+        }
+      }
   }
 }
