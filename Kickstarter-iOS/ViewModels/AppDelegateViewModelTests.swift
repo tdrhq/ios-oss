@@ -409,6 +409,8 @@ final class AppDelegateViewModelTests: TestCase {
     }
   }
 
+  // MARK: - Tracking
+
   func testKoala_AppLifecycle() {
     XCTAssertEqual([], trackingClient.events)
 
@@ -453,6 +455,8 @@ final class AppDelegateViewModelTests: TestCase {
     self.vm.inputs.crashManagerDidFinishSendingCrashReport()
     XCTAssertEqual(["App Open", "Opened App", "Crashed App"], trackingClient.events)
   }
+
+  // MARK: - Current User Updates
 
   func testCurrentUserUpdating_NothingHappensWhenLoggedOut() {
     self.vm.inputs.applicationDidFinishLaunching(
@@ -622,6 +626,8 @@ final class AppDelegateViewModelTests: TestCase {
     withEnvironment(apiService: apiService) {
       let rootUrl = "https://www.kickstarter.com/"
 
+      self.vm.inputs.userHasEnvironmentInStorage(false)
+
       self.vm.inputs.applicationDidFinishLaunching(
         application: UIApplication.shared,
         launchOptions: [:]
@@ -689,6 +695,8 @@ final class AppDelegateViewModelTests: TestCase {
     withEnvironment(apiService: apiService) {
       let rootUrl = "https://www.kickstarter.com/"
 
+      self.vm.inputs.userHasEnvironmentInStorage(false)
+
       self.vm.inputs.applicationDidFinishLaunching(
         application: UIApplication.shared,
         launchOptions: [:]
@@ -716,6 +724,8 @@ final class AppDelegateViewModelTests: TestCase {
     let apiService = MockService(fetchProjectResponse: project)
     withEnvironment(apiService: apiService) {
       let rootUrl = "https://www.kickstarter.com/"
+
+      self.vm.inputs.userHasEnvironmentInStorage(false)
 
       self.vm.inputs.applicationDidFinishLaunching(
         application: UIApplication.shared,
@@ -745,6 +755,8 @@ final class AppDelegateViewModelTests: TestCase {
     withEnvironment(apiService: apiService) {
       let rootUrl = "https://www.kickstarter.com/"
 
+      self.vm.inputs.userHasEnvironmentInStorage(false)
+
       self.vm.inputs.applicationDidFinishLaunching(
         application: UIApplication.shared,
         launchOptions: [:]
@@ -766,6 +778,8 @@ final class AppDelegateViewModelTests: TestCase {
   }
 
   func testGoToActivity() {
+    self.vm.inputs.userHasEnvironmentInStorage(false)
+
     self.vm.inputs.applicationDidFinishLaunching(
       application: UIApplication.shared,
       launchOptions: [:]
@@ -784,6 +798,8 @@ final class AppDelegateViewModelTests: TestCase {
   }
 
   func testGoToDashboard() {
+    self.vm.inputs.userHasEnvironmentInStorage(false)
+
     self.vm.inputs.applicationDidFinishLaunching(
       application: UIApplication.shared,
       launchOptions: [:]
@@ -803,6 +819,8 @@ final class AppDelegateViewModelTests: TestCase {
   }
 
   func testGoToDiscovery() {
+    self.vm.inputs.userHasEnvironmentInStorage(false)
+
     self.vm.inputs.applicationDidFinishLaunching(
       application: UIApplication.shared,
       launchOptions: [:]
@@ -823,6 +841,8 @@ final class AppDelegateViewModelTests: TestCase {
   }
 
   func testGoToDiscovery_NoParams() {
+    self.vm.inputs.userHasEnvironmentInStorage(false)
+
     self.vm.inputs.applicationDidFinishLaunching(
       application: UIApplication.shared,
       launchOptions: [:]
@@ -841,6 +861,8 @@ final class AppDelegateViewModelTests: TestCase {
   }
 
   func testGoToDiscoveryWithCategory() {
+    self.vm.inputs.userHasEnvironmentInStorage(false)
+
     self.vm.inputs.applicationDidFinishLaunching(
       application: UIApplication.shared,
       launchOptions: [:]
@@ -863,6 +885,8 @@ final class AppDelegateViewModelTests: TestCase {
   }
 
   func testGoToLogin() {
+    self.vm.inputs.userHasEnvironmentInStorage(false)
+
     self.vm.inputs.applicationDidFinishLaunching(
       application: UIApplication.shared,
       launchOptions: [:]
@@ -881,6 +905,8 @@ final class AppDelegateViewModelTests: TestCase {
   }
 
   func testGoToProfile() {
+    self.vm.inputs.userHasEnvironmentInStorage(false)
+
     self.vm.inputs.applicationDidFinishLaunching(
       application: UIApplication.shared,
       launchOptions: [:]
@@ -899,6 +925,8 @@ final class AppDelegateViewModelTests: TestCase {
   }
 
   func testGoToSearch() {
+    self.vm.inputs.userHasEnvironmentInStorage(false)
+
     self.vm.inputs.applicationDidFinishLaunching(
       application: UIApplication.shared,
       launchOptions: [:]
@@ -917,11 +945,6 @@ final class AppDelegateViewModelTests: TestCase {
   }
 
   func testDeeplink_WhenOnboardingFlowIsActive() {
-    self.vm.inputs.applicationDidFinishLaunching(
-      application: UIApplication.shared,
-      launchOptions: [:]
-    )
-
     let optimizelyClient = MockOptimizelyClient()
       |> \.experiments .~ [
         OptimizelyExperiment.Key.onboardingCategoryPersonalizationFlow.rawValue:
@@ -929,6 +952,12 @@ final class AppDelegateViewModelTests: TestCase {
       ]
 
     withEnvironment(currentUser: nil, optimizelyClient: optimizelyClient) {
+      self.vm.inputs.userHasEnvironmentInStorage(false)
+      self.vm.inputs.applicationDidFinishLaunching(
+        application: UIApplication.shared,
+        launchOptions: [:]
+      )
+
       let result = self.vm.inputs.applicationOpenUrl(
         application: UIApplication.shared,
         url: URL(string: "https://www.kickstarter.com/search")!,
@@ -940,6 +969,8 @@ final class AppDelegateViewModelTests: TestCase {
       self.goToSearch.assertValueCount(0)
     }
   }
+
+  // MARK: - Push Registration
 
   func testRegisterPushNotifications_Prompted() {
     let client = MockTrackingClient()
@@ -1062,13 +1093,18 @@ final class AppDelegateViewModelTests: TestCase {
     }
   }
 
+  // MARK: - Push Notifications
+
   func testOpenPushNotification_WhileInBackground() {
+    self.vm.inputs.userHasEnvironmentInStorage(false)
     self.vm.inputs.applicationDidFinishLaunching(
       application: UIApplication.shared,
       launchOptions: [:]
     )
 
     self.presentViewController.assertValueCount(0)
+
+    self.vm.inputs.userHasEnvironmentInStorage(false)
 
     self.vm.inputs.didReceive(remoteNotification: friendBackingPushData)
 
@@ -1088,6 +1124,8 @@ final class AppDelegateViewModelTests: TestCase {
       .flatMap { $0["project_id"] as? Int }
     let param = Param.id(projectId ?? -1)
 
+    self.vm.inputs.userHasEnvironmentInStorage(false)
+
     self.vm.inputs.didReceive(remoteNotification: backingForCreatorPushData)
 
     self.goToProjectActivities.assertValues([param])
@@ -1099,12 +1137,16 @@ final class AppDelegateViewModelTests: TestCase {
     badActivityData?["project_id"] = nil
     badPushData["activity"] = badActivityData
 
+    self.vm.inputs.userHasEnvironmentInStorage(false)
+
     self.vm.inputs.didReceive(remoteNotification: badPushData)
 
     self.goToDashboard.assertValueCount(0)
   }
 
   func testOpenNotification_ProjectUpdate() {
+    self.vm.inputs.userHasEnvironmentInStorage(false)
+
     self.vm.inputs.didReceive(remoteNotification: updatePushData)
 
     self.presentViewController.assertValueCount(1)
@@ -1114,12 +1156,15 @@ final class AppDelegateViewModelTests: TestCase {
     var badPushData = updatePushData
     badPushData["activity"]?["update_id"] = nil
 
+    self.vm.inputs.userHasEnvironmentInStorage(false)
     self.vm.inputs.didReceive(remoteNotification: badPushData)
 
     self.presentViewController.assertValueCount(0)
   }
 
   func testOpenNotification_SurveyResponse() {
+    self.vm.inputs.userHasEnvironmentInStorage(false)
+
     self.vm.inputs.didReceive(remoteNotification: surveyResponsePushData)
 
     self.presentViewController.assertValueCount(1)
@@ -1129,12 +1174,14 @@ final class AppDelegateViewModelTests: TestCase {
     var badPushData = surveyResponsePushData
     badPushData["survey"]?["id"] = nil
 
+    self.vm.inputs.userHasEnvironmentInStorage(false)
     self.vm.inputs.didReceive(remoteNotification: badPushData)
 
     self.presentViewController.assertValueCount(0)
   }
 
   func testOpenNotification_UpdateComment() {
+    self.vm.inputs.userHasEnvironmentInStorage(false)
     self.vm.inputs.didReceive(remoteNotification: updateCommentPushData)
 
     self.presentViewController.assertValueCount(1)
@@ -1144,12 +1191,14 @@ final class AppDelegateViewModelTests: TestCase {
     var badPushData = updatePushData
     badPushData["activity"]?["update_id"] = nil
 
+    self.vm.inputs.userHasEnvironmentInStorage(false)
     self.vm.inputs.didReceive(remoteNotification: badPushData)
 
     self.presentViewController.assertValueCount(0)
   }
 
   func testOpenNotification_ProjectComment() {
+    self.vm.inputs.userHasEnvironmentInStorage(false)
     self.vm.inputs.didReceive(remoteNotification: projectCommentPushData)
 
     self.presentViewController.assertValueCount(1)
@@ -1159,12 +1208,14 @@ final class AppDelegateViewModelTests: TestCase {
     var badPushData = updatePushData
     badPushData["activity"]?["project_id"] = nil
 
+    self.vm.inputs.userHasEnvironmentInStorage(false)
     self.vm.inputs.didReceive(remoteNotification: badPushData)
 
     self.presentViewController.assertValueCount(0)
   }
 
   func testOpenNotification_GenericProject() {
+    self.vm.inputs.userHasEnvironmentInStorage(false)
     self.vm.inputs.didReceive(remoteNotification: genericProjectPushData)
 
     self.presentViewController.assertValueCount(1)
@@ -1172,6 +1223,7 @@ final class AppDelegateViewModelTests: TestCase {
 
   func testOpenNotification_ProjectStateChanges() {
     let states: [Activity.Category] = [.failure, .launch, .success, .cancellation, .suspension]
+    self.vm.inputs.userHasEnvironmentInStorage(false)
 
     self.vm.inputs.applicationDidFinishLaunching(
       application: UIApplication.shared,
@@ -1196,6 +1248,8 @@ final class AppDelegateViewModelTests: TestCase {
     let projectId = (backingForCreatorPushData["activity"] as? [String: AnyObject])
       .flatMap { $0["project_id"] as? Int }
     let param = Param.id(projectId ?? -1)
+
+    self.vm.inputs.userHasEnvironmentInStorage(false)
 
     self.vm.inputs.applicationDidFinishLaunching(
       application: UIApplication.shared,
@@ -1224,6 +1278,8 @@ final class AppDelegateViewModelTests: TestCase {
       ]
     ]
 
+    self.vm.inputs.userHasEnvironmentInStorage(false)
+
     self.vm.inputs.didReceive(remoteNotification: pushData)
 
     self.presentViewController.assertValues([2])
@@ -1232,6 +1288,7 @@ final class AppDelegateViewModelTests: TestCase {
   func testOpenNotification_UnrecognizedActivityType() {
     let categories: [Activity.Category] = [.follow, .funding, .unknown, .watch]
 
+    self.vm.inputs.userHasEnvironmentInStorage(false)
     self.vm.inputs.applicationDidFinishLaunching(
       application: UIApplication.shared,
       launchOptions: [:]
@@ -1267,15 +1324,54 @@ final class AppDelegateViewModelTests: TestCase {
       ]
 
     withEnvironment(currentUser: nil, optimizelyClient: optimizelyClient) {
+      self.vm.inputs.userHasEnvironmentInStorage(false)
+      self.vm.inputs.didUpdateOptimizelyClient(optimizelyClient)
+      self.vm.inputs.applicationDidFinishLaunching(
+        application: .shared,
+        launchOptions: [:]
+      )
+
+      self.vm.inputs.didReceive(remoteNotification: pushData)
+
+      self.goToCategoriesPersonalizationOnboarding.assertValueCount(1)
+      self.presentViewController.assertValueCount(0)
+    }
+  }
+
+  func testOpenPushNotification_WhenLandingPageExperiment_IsActive() {
+    let pushData: [String: Any] = [
+      "aps": [
+        "alert": "Blob liked your update: Important message..."
+      ],
+      "post": [
+        "id": 1,
+        "project_id": 2
+      ]
+    ]
+
+    let optimizelyClient = MockOptimizelyClient()
+      |> \.experiments .~ [
+        OptimizelyExperiment.Key.nativeOnboarding.rawValue:
+          OptimizelyExperiment.Variant.variant1.rawValue
+      ]
+
+    withEnvironment(currentUser: nil, optimizelyClient: optimizelyClient) {
+      self.vm.inputs.userHasEnvironmentInStorage(false)
+      self.vm.inputs.applicationDidFinishLaunching(application: .shared, launchOptions: [:])
+      self.vm.inputs.didUpdateOptimizelyClient(optimizelyClient)
+
       self.vm.inputs.didReceive(remoteNotification: pushData)
 
       self.presentViewController.assertValueCount(0)
     }
   }
 
+  // MARK: - ContinueUserActivity
+
   func testContinueUserActivity_ValidActivity() {
     let userActivity = NSUserActivity(activityType: NSUserActivityTypeBrowsingWeb)
     userActivity.webpageURL = URL(string: "https://www.kickstarter.com/activity")
+    self.vm.inputs.userHasEnvironmentInStorage(false)
 
     self.vm.inputs.applicationDidFinishLaunching(application: .shared, launchOptions: [:])
 
@@ -1300,6 +1396,7 @@ final class AppDelegateViewModelTests: TestCase {
 
   func testContinueUserActivity_InvalidActivity() {
     let userActivity = NSUserActivity(activityType: "Other")
+    self.vm.inputs.userHasEnvironmentInStorage(false)
 
     self.vm.inputs.applicationDidFinishLaunching(application: .shared, launchOptions: [:])
     let result = self.vm.inputs.applicationContinueUserActivity(userActivity)
@@ -1320,6 +1417,8 @@ final class AppDelegateViewModelTests: TestCase {
       ]
 
     withEnvironment(currentUser: nil, optimizelyClient: optimizelyClient) {
+      self.vm.inputs.userHasEnvironmentInStorage(false)
+
       self.vm.inputs.applicationDidFinishLaunching(application: .shared, launchOptions: [:])
 
       self.goToActivity.assertValueCount(0)
@@ -1332,6 +1431,34 @@ final class AppDelegateViewModelTests: TestCase {
       self.goToActivity.assertValueCount(0)
     }
   }
+
+  func testContinueUserActivity_WhenLandingPageExperiment_IsActive() {
+    let userActivity = NSUserActivity(activityType: NSUserActivityTypeBrowsingWeb)
+    userActivity.webpageURL = URL(string: "https://www.kickstarter.com/activity")
+
+    let optimizelyClient = MockOptimizelyClient()
+      |> \.experiments .~ [
+        OptimizelyExperiment.Key.nativeOnboarding.rawValue:
+          OptimizelyExperiment.Variant.variant1.rawValue
+      ]
+
+    withEnvironment(currentUser: nil, optimizelyClient: optimizelyClient) {
+      self.vm.inputs.userHasEnvironmentInStorage(false)
+      self.vm.inputs.applicationDidFinishLaunching(application: .shared, launchOptions: [:])
+      self.vm.inputs.didUpdateOptimizelyClient(optimizelyClient)
+
+      self.goToActivity.assertValueCount(0)
+      XCTAssertFalse(self.vm.outputs.continueUserActivityReturnValue.value)
+
+      let result = self.vm.inputs.applicationContinueUserActivity(userActivity)
+      XCTAssertTrue(result)
+
+      XCTAssertTrue(self.vm.outputs.continueUserActivityReturnValue.value)
+      self.goToActivity.assertValueCount(0)
+    }
+  }
+
+  // MARK: - Shortcut Items
 
   func testSetApplicationShortcutItems() {
     self.setApplicationShortcutItems.assertValues([])
@@ -1362,6 +1489,7 @@ final class AppDelegateViewModelTests: TestCase {
 
     withEnvironment(apiService: MockService(fetchUserSelfResponse: currentUser), currentUser: currentUser) {
       self.setApplicationShortcutItems.assertValues([])
+      self.vm.inputs.userHasEnvironmentInStorage(false)
 
       self.vm.inputs.applicationDidFinishLaunching(application: .shared, launchOptions: [:])
 
@@ -1381,6 +1509,7 @@ final class AppDelegateViewModelTests: TestCase {
 
     withEnvironment(apiService: MockService(fetchUserSelfResponse: currentUser), currentUser: currentUser) {
       self.setApplicationShortcutItems.assertValues([])
+      self.vm.inputs.userHasEnvironmentInStorage(false)
 
       self.vm.inputs.applicationDidFinishLaunching(application: .shared, launchOptions: [:])
 
@@ -1395,6 +1524,8 @@ final class AppDelegateViewModelTests: TestCase {
   }
 
   func testPerformShortcutItem_CreatorDashboard() {
+    self.vm.inputs.userHasEnvironmentInStorage(false)
+
     self.vm.inputs.applicationDidFinishLaunching(
       application: UIApplication.shared,
       launchOptions: [:]
@@ -1410,6 +1541,8 @@ final class AppDelegateViewModelTests: TestCase {
   }
 
   func testLaunchShortcutItem_CreatorDashboard() {
+    self.vm.inputs.userHasEnvironmentInStorage(false)
+
     self.vm.inputs.applicationDidFinishLaunching(
       application: UIApplication.shared,
       launchOptions: [
@@ -1422,6 +1555,8 @@ final class AppDelegateViewModelTests: TestCase {
   }
 
   func testPerformShortcutItem_ProjectsWeLove() {
+    self.vm.inputs.userHasEnvironmentInStorage(false)
+
     self.vm.inputs.applicationDidFinishLaunching(
       application: UIApplication.shared,
       launchOptions: [:]
@@ -1440,6 +1575,8 @@ final class AppDelegateViewModelTests: TestCase {
   }
 
   func testLaunchShortcutItem_ProjectsWeLove() {
+    self.vm.inputs.userHasEnvironmentInStorage(false)
+
     self.vm.inputs.applicationDidFinishLaunching(
       application: UIApplication.shared,
       launchOptions: [
@@ -1455,6 +1592,8 @@ final class AppDelegateViewModelTests: TestCase {
   }
 
   func testPerformShortcutItem_RecommendedForYou() {
+    self.vm.inputs.userHasEnvironmentInStorage(false)
+
     self.vm.inputs.applicationDidFinishLaunching(
       application: UIApplication.shared,
       launchOptions: [:]
@@ -1473,6 +1612,8 @@ final class AppDelegateViewModelTests: TestCase {
   }
 
   func testLaunchShortcutItem_RecommendedForYou() {
+    self.vm.inputs.userHasEnvironmentInStorage(false)
+
     self.vm.inputs.applicationDidFinishLaunching(
       application: UIApplication.shared,
       launchOptions: [
@@ -1488,6 +1629,8 @@ final class AppDelegateViewModelTests: TestCase {
   }
 
   func testPerformShortcutItem_Search() {
+    self.vm.inputs.userHasEnvironmentInStorage(false)
+
     self.vm.inputs.applicationDidFinishLaunching(
       application: UIApplication.shared,
       launchOptions: [:]
@@ -1508,10 +1651,31 @@ final class AppDelegateViewModelTests: TestCase {
       ]
 
     withEnvironment(currentUser: nil, optimizelyClient: optimizelyClient) {
+      self.vm.inputs.userHasEnvironmentInStorage(false)
       self.vm.inputs.applicationDidFinishLaunching(
         application: UIApplication.shared,
         launchOptions: [:]
       )
+      self.vm.inputs.didUpdateOptimizelyClient(optimizelyClient)
+
+      self.vm.inputs.applicationPerformActionForShortcutItem(ShortcutItem.search.applicationShortcutItem)
+
+      self.goToSearch.assertValueCount(0)
+    }
+  }
+
+  func testPerformShortcutItem_WhenLandingPageExperiment_IsActive() {
+    let optimizelyClient = MockOptimizelyClient()
+      |> \.experiments .~ [
+        OptimizelyExperiment.Key.nativeOnboarding.rawValue:
+          OptimizelyExperiment.Variant.variant1.rawValue
+      ]
+
+    withEnvironment(currentUser: nil, optimizelyClient: optimizelyClient) {
+      self.vm.inputs.userHasEnvironmentInStorage(false)
+      self.vm.inputs.applicationDidFinishLaunching(application: .shared, launchOptions: [:])
+      self.vm.inputs.didUpdateOptimizelyClient(optimizelyClient)
+
       self.vm.inputs.applicationPerformActionForShortcutItem(ShortcutItem.search.applicationShortcutItem)
 
       self.goToSearch.assertValueCount(0)
@@ -1519,6 +1683,7 @@ final class AppDelegateViewModelTests: TestCase {
   }
 
   func testLaunchShortcutItem_Search() {
+    self.vm.inputs.userHasEnvironmentInStorage(false)
     self.vm.inputs.applicationDidFinishLaunching(
       application: UIApplication.shared,
       launchOptions: [
@@ -1538,12 +1703,36 @@ final class AppDelegateViewModelTests: TestCase {
       ]
 
     withEnvironment(currentUser: nil, optimizelyClient: optimizelyClient) {
+      self.vm.inputs.userHasEnvironmentInStorage(false)
       self.vm.inputs.applicationDidFinishLaunching(
         application: UIApplication.shared,
         launchOptions: [
           UIApplication.LaunchOptionsKey.shortcutItem: ShortcutItem.search.applicationShortcutItem
         ]
       )
+      self.vm.inputs.didUpdateOptimizelyClient(optimizelyClient)
+
+      self.goToSearch.assertValueCount(0)
+      XCTAssertFalse(self.vm.outputs.applicationDidFinishLaunchingReturnValue)
+    }
+  }
+
+  func testLaunchShortcutItem_WhenLandingPageExperiment_IsActive() {
+    let optimizelyClient = MockOptimizelyClient()
+      |> \.experiments .~ [
+        OptimizelyExperiment.Key.nativeOnboarding.rawValue:
+          OptimizelyExperiment.Variant.variant1.rawValue
+      ]
+
+    withEnvironment(currentUser: nil, optimizelyClient: optimizelyClient) {
+      self.vm.inputs.userHasEnvironmentInStorage(false)
+      self.vm.inputs.applicationDidFinishLaunching(
+        application: UIApplication.shared,
+        launchOptions: [
+          UIApplication.LaunchOptionsKey.shortcutItem: ShortcutItem.search.applicationShortcutItem
+        ]
+      )
+      self.vm.inputs.didUpdateOptimizelyClient(optimizelyClient)
 
       self.goToSearch.assertValueCount(0)
       XCTAssertFalse(self.vm.outputs.applicationDidFinishLaunchingReturnValue)
@@ -1551,6 +1740,7 @@ final class AppDelegateViewModelTests: TestCase {
   }
 
   func testPerformShortcutItem_KoalaTracking() {
+    self.vm.inputs.userHasEnvironmentInStorage(false)
     // Launch app and wait for shortcuts to be set
     self.vm.inputs.applicationDidFinishLaunching(
       application: UIApplication.shared,
@@ -1608,6 +1798,7 @@ final class AppDelegateViewModelTests: TestCase {
   }
 
   func testLaunchShortcutItem_KoalaTracking() {
+    self.vm.inputs.userHasEnvironmentInStorage(false)
     self.vm.inputs.applicationDidFinishLaunching(
       application: UIApplication.shared,
       launchOptions: [
@@ -1629,6 +1820,8 @@ final class AppDelegateViewModelTests: TestCase {
       self.trackingClient.properties(forKey: "context", as: String.self)
     )
   }
+
+  // MARK: - Visitor Cookies
 
   func testVisitorCookies_ApplicationDidFinishLaunching() {
     self.vm.inputs.applicationDidFinishLaunching(
@@ -1771,8 +1964,11 @@ final class AppDelegateViewModelTests: TestCase {
     )
   }
 
+  // MARK: Deeplinks
+
   func testEmailDeepLinking() {
     let emailUrl = URL(string: "https://click.e.kickstarter.com/?qs=deadbeef")!
+    self.vm.inputs.userHasEnvironmentInStorage(false)
 
     // The application launches.
     self.vm.inputs.applicationDidFinishLaunching(
@@ -1815,11 +2011,15 @@ final class AppDelegateViewModelTests: TestCase {
       ]
 
     withEnvironment(currentUser: nil, optimizelyClient: optimizelyClient) {
+      self.vm.inputs.userHasEnvironmentInStorage(false)
+
       // The application launches.
       self.vm.inputs.applicationDidFinishLaunching(
         application: UIApplication.shared,
         launchOptions: [:]
       )
+
+      self.vm.inputs.didUpdateOptimizelyClient(optimizelyClient)
 
       // We deep-link to an email url.
       self.vm.inputs.applicationDidEnterBackground()
@@ -1848,6 +2048,7 @@ final class AppDelegateViewModelTests: TestCase {
     let emailUrl = URL(string: "https://click.e.kickstarter.com/?qs=deadbeef")!
     let userActivity = NSUserActivity(activityType: NSUserActivityTypeBrowsingWeb)
     userActivity.webpageURL = emailUrl
+    self.vm.inputs.userHasEnvironmentInStorage(false)
 
     // The application launches.
     self.vm.inputs.applicationDidFinishLaunching(
@@ -1879,6 +2080,7 @@ final class AppDelegateViewModelTests: TestCase {
 
   func testEmailDeepLinking_UnrecognizedUrl() {
     let emailUrl = URL(string: "https://click.e.kickstarter.com/?qs=deadbeef")!
+    self.vm.inputs.userHasEnvironmentInStorage(false)
 
     // The application launches.
     self.vm.inputs.applicationDidFinishLaunching(
@@ -1915,6 +2117,7 @@ final class AppDelegateViewModelTests: TestCase {
 
   func testEmailDeepLinking_UnrecognizedUrl_ProjectPreview() {
     let emailUrl = URL(string: "https://click.e.kickstarter.com/?qs=deadbeef")!
+    self.vm.inputs.userHasEnvironmentInStorage(false)
 
     // The application launches.
     self.vm.inputs.applicationDidFinishLaunching(
@@ -1951,6 +2154,7 @@ final class AppDelegateViewModelTests: TestCase {
 
   func testOtherEmailDeepLink() {
     let emailUrl = URL(string: "https://email.kickstarter.com/mpss/a/b/c/d/e/f/g")!
+    self.vm.inputs.userHasEnvironmentInStorage(false)
 
     // The application launches.
     self.vm.inputs.applicationDidFinishLaunching(
@@ -1985,6 +2189,8 @@ final class AppDelegateViewModelTests: TestCase {
   }
 
   func testProjectSurveyDeepLink() {
+    self.vm.inputs.userHasEnvironmentInStorage(false)
+
     self.vm.inputs.applicationDidFinishLaunching(
       application: UIApplication.shared,
       launchOptions: [:]
@@ -2005,6 +2211,8 @@ final class AppDelegateViewModelTests: TestCase {
   }
 
   func testUserSurveyDeepLink() {
+    self.vm.inputs.userHasEnvironmentInStorage(false)
+
     self.vm.inputs.applicationDidFinishLaunching(
       application: UIApplication.shared,
       launchOptions: [:]
@@ -2024,6 +2232,8 @@ final class AppDelegateViewModelTests: TestCase {
   }
 
   func testDeeplink_WhenLandingPageExperiment_IsActive() {
+    self.vm.inputs.userHasEnvironmentInStorage(false)
+
     self.vm.inputs.applicationDidFinishLaunching(
       application: UIApplication.shared,
       launchOptions: [:]
@@ -2036,6 +2246,10 @@ final class AppDelegateViewModelTests: TestCase {
       ]
 
     withEnvironment(currentUser: nil, optimizelyClient: optimizelyClient) {
+      self.vm.inputs.userHasEnvironmentInStorage(false)
+      self.vm.inputs.applicationDidFinishLaunching(application: .shared, launchOptions: [:])
+      self.vm.inputs.didUpdateOptimizelyClient(optimizelyClient)
+
       let result = self.vm.inputs.applicationOpenUrl(
         application: UIApplication.shared,
         url: URL(string: "https://www.kickstarter.com/search")!,
@@ -2048,92 +2262,6 @@ final class AppDelegateViewModelTests: TestCase {
     }
   }
 
-  func testOpenPushNotification_WhenLandingPageExperiment_IsActive() {
-    let pushData: [String: Any] = [
-      "aps": [
-        "alert": "Blob liked your update: Important message..."
-      ],
-      "post": [
-        "id": 1,
-        "project_id": 2
-      ]
-    ]
-
-    let optimizelyClient = MockOptimizelyClient()
-      |> \.experiments .~ [
-        OptimizelyExperiment.Key.nativeOnboarding.rawValue:
-          OptimizelyExperiment.Variant.variant1.rawValue
-      ]
-
-    withEnvironment(currentUser: nil, optimizelyClient: optimizelyClient) {
-      self.vm.inputs.didReceive(remoteNotification: pushData)
-
-      self.presentViewController.assertValueCount(0)
-    }
-  }
-
-  func testContinueUserActivity_WhenLandingPageExperiment_IsActive() {
-    let userActivity = NSUserActivity(activityType: NSUserActivityTypeBrowsingWeb)
-    userActivity.webpageURL = URL(string: "https://www.kickstarter.com/activity")
-
-    let optimizelyClient = MockOptimizelyClient()
-      |> \.experiments .~ [
-        OptimizelyExperiment.Key.nativeOnboarding.rawValue:
-          OptimizelyExperiment.Variant.variant1.rawValue
-      ]
-
-    withEnvironment(currentUser: nil, optimizelyClient: optimizelyClient) {
-      self.vm.inputs.applicationDidFinishLaunching(application: .shared, launchOptions: [:])
-
-      self.goToActivity.assertValueCount(0)
-      XCTAssertFalse(self.vm.outputs.continueUserActivityReturnValue.value)
-
-      let result = self.vm.inputs.applicationContinueUserActivity(userActivity)
-      XCTAssertTrue(result)
-
-      XCTAssertTrue(self.vm.outputs.continueUserActivityReturnValue.value)
-      self.goToActivity.assertValueCount(0)
-    }
-  }
-
-  func testPerformShortcutItem_WhenLandingPageExperiment_IsActive() {
-    let optimizelyClient = MockOptimizelyClient()
-      |> \.experiments .~ [
-        OptimizelyExperiment.Key.nativeOnboarding.rawValue:
-          OptimizelyExperiment.Variant.variant1.rawValue
-      ]
-
-    withEnvironment(currentUser: nil, optimizelyClient: optimizelyClient) {
-      self.vm.inputs.applicationDidFinishLaunching(
-        application: UIApplication.shared,
-        launchOptions: [:]
-      )
-      self.vm.inputs.applicationPerformActionForShortcutItem(ShortcutItem.search.applicationShortcutItem)
-
-      self.goToSearch.assertValueCount(0)
-    }
-  }
-
-  func testLaunchShortcutItem_WhenLandingPageExperiment_IsActive() {
-    let optimizelyClient = MockOptimizelyClient()
-      |> \.experiments .~ [
-        OptimizelyExperiment.Key.nativeOnboarding.rawValue:
-          OptimizelyExperiment.Variant.variant1.rawValue
-      ]
-
-    withEnvironment(currentUser: nil, optimizelyClient: optimizelyClient) {
-      self.vm.inputs.applicationDidFinishLaunching(
-        application: UIApplication.shared,
-        launchOptions: [
-          UIApplication.LaunchOptionsKey.shortcutItem: ShortcutItem.search.applicationShortcutItem
-        ]
-      )
-
-      self.goToSearch.assertValueCount(0)
-      XCTAssertFalse(self.vm.outputs.applicationDidFinishLaunchingReturnValue)
-    }
-  }
-
   func testEmailDeepLinking_WhenLandingPageExperiment_IsActive() {
     let emailUrl = URL(string: "https://click.e.kickstarter.com/?qs=deadbeef")!
     let optimizelyClient = MockOptimizelyClient()
@@ -2143,11 +2271,13 @@ final class AppDelegateViewModelTests: TestCase {
       ]
 
     withEnvironment(currentUser: nil, optimizelyClient: optimizelyClient) {
+      self.vm.inputs.userHasEnvironmentInStorage(false)
       // The application launches.
       self.vm.inputs.applicationDidFinishLaunching(
         application: UIApplication.shared,
         launchOptions: [:]
       )
+      self.vm.inputs.didUpdateOptimizelyClient(optimizelyClient)
 
       // We deep-link to an email url.
       self.vm.inputs.applicationDidEnterBackground()
@@ -2396,6 +2526,7 @@ final class AppDelegateViewModelTests: TestCase {
       self.evaluateQualtricsTargetingLogic.assertDidNotEmitValue()
       XCTAssertEqual(mockQualtricsPropertiesType.values[firstAppSessionKey], nil)
 
+      self.vm.inputs.userHasEnvironmentInStorage(false)
       self.vm.inputs.applicationDidFinishLaunching(application: UIApplication.shared, launchOptions: nil)
       self.vm.inputs.didUpdateConfig(config)
 
@@ -2437,6 +2568,8 @@ final class AppDelegateViewModelTests: TestCase {
     }
   }
 
+  // MARK: - Onboarding
+
   func testGoToCategoriesPersonalizationOnboarding_WhenLoggedIn() {
     let mockOptimizelyClient = MockOptimizelyClient()
       |> \.experiments
@@ -2446,6 +2579,7 @@ final class AppDelegateViewModelTests: TestCase {
       ]
 
     self.goToCategoriesPersonalizationOnboarding.assertDidNotEmitValue()
+    self.vm.inputs.userHasEnvironmentInStorage(false)
 
     self.vm.inputs.applicationDidFinishLaunching(application: nil, launchOptions: nil)
     _ = self.vm.inputs.optimizelyConfigured(with: MockOptimizelyResult())
@@ -2472,6 +2606,7 @@ final class AppDelegateViewModelTests: TestCase {
     mockValueStore.hasSeenCategoryPersonalizationFlow = true
 
     self.goToCategoriesPersonalizationOnboarding.assertDidNotEmitValue()
+    self.vm.inputs.userHasEnvironmentInStorage(false)
 
     self.vm.inputs.applicationDidFinishLaunching(application: nil, launchOptions: nil)
     _ = self.vm.inputs.optimizelyConfigured(with: MockOptimizelyResult())
@@ -2498,6 +2633,8 @@ final class AppDelegateViewModelTests: TestCase {
 
     self.goToCategoriesPersonalizationOnboarding.assertDidNotEmitValue()
 
+    self.vm.inputs.userHasEnvironmentInStorage(false)
+
     self.vm.inputs.applicationDidFinishLaunching(application: nil, launchOptions: nil)
     _ = self.vm.inputs.optimizelyConfigured(with: MockOptimizelyResult())
 
@@ -2522,6 +2659,8 @@ final class AppDelegateViewModelTests: TestCase {
     let mockValueStore = MockKeyValueStore()
 
     self.goToCategoriesPersonalizationOnboarding.assertDidNotEmitValue()
+
+    self.vm.inputs.userHasEnvironmentInStorage(false)
 
     self.vm.inputs.applicationDidFinishLaunching(application: nil, launchOptions: nil)
     _ = self.vm.inputs.optimizelyConfigured(with: MockOptimizelyResult())
@@ -2548,6 +2687,35 @@ final class AppDelegateViewModelTests: TestCase {
 
     self.goToCategoriesPersonalizationOnboarding.assertDidNotEmitValue()
 
+    self.vm.inputs.userHasEnvironmentInStorage(false)
+
+    self.vm.inputs.applicationDidFinishLaunching(application: nil, launchOptions: nil)
+    _ = self.vm.inputs.optimizelyConfigured(with: MockOptimizelyResult())
+
+    withEnvironment(
+      currentUser: nil,
+      optimizelyClient: mockOptimizelyClient,
+      userDefaults: mockValueStore
+    ) {
+      self.vm.inputs.didUpdateOptimizelyClient(mockOptimizelyClient)
+
+      self.goToCategoriesPersonalizationOnboarding.assertDidNotEmitValue()
+    }
+  }
+
+  func testGoToCategoriesPersonalizationOnboarding_DoesNotEmit_IfUserHasEnvironmentInStorage() {
+    let mockOptimizelyClient = MockOptimizelyClient()
+      |> \.experiments
+      .~ [
+        OptimizelyExperiment.Key.onboardingCategoryPersonalizationFlow.rawValue:
+          OptimizelyExperiment.Variant.variant1.rawValue
+      ]
+    let mockValueStore = MockKeyValueStore()
+
+    self.goToCategoriesPersonalizationOnboarding.assertDidNotEmitValue()
+
+    self.vm.inputs.userHasEnvironmentInStorage(true)
+
     self.vm.inputs.applicationDidFinishLaunching(application: nil, launchOptions: nil)
     _ = self.vm.inputs.optimizelyConfigured(with: MockOptimizelyResult())
 
@@ -2568,6 +2736,8 @@ final class AppDelegateViewModelTests: TestCase {
       [OptimizelyExperiment.Key.nativeOnboarding.rawValue: OptimizelyExperiment.Variant.variant1.rawValue]
 
     withEnvironment(currentUser: nil, optimizelyClient: optimizelyClient) {
+      self.vm.inputs.userHasEnvironmentInStorage(false)
+
       self.vm.inputs.applicationDidFinishLaunching(application: UIApplication.shared, launchOptions: nil)
 
       self.goToLandingPage.assertDidNotEmitValue()
@@ -2584,6 +2754,8 @@ final class AppDelegateViewModelTests: TestCase {
       [OptimizelyExperiment.Key.nativeOnboarding.rawValue: OptimizelyExperiment.Variant.control.rawValue]
 
     withEnvironment(currentUser: nil, optimizelyClient: optimizelyClient) {
+      self.vm.inputs.userHasEnvironmentInStorage(false)
+
       self.vm.inputs.applicationDidFinishLaunching(application: UIApplication.shared, launchOptions: nil)
 
       self.vm.inputs.didUpdateOptimizelyClient(MockOptimizelyClient())
@@ -2601,6 +2773,8 @@ final class AppDelegateViewModelTests: TestCase {
       |> \.hasSeenLandingPage .~ true
 
     withEnvironment(currentUser: nil, optimizelyClient: optimizelyClient, userDefaults: userDefaults) {
+      self.vm.inputs.userHasEnvironmentInStorage(false)
+
       self.vm.inputs.applicationDidFinishLaunching(application: UIApplication.shared, launchOptions: nil)
 
       self.vm.inputs.didUpdateOptimizelyClient(MockOptimizelyClient())
@@ -2618,9 +2792,38 @@ final class AppDelegateViewModelTests: TestCase {
       |> \.hasSeenLandingPage .~ false
 
     withEnvironment(currentUser: .template, optimizelyClient: optimizelyClient, userDefaults: userDefaults) {
+      self.vm.inputs.userHasEnvironmentInStorage(false)
+
       self.vm.inputs.applicationDidFinishLaunching(application: UIApplication.shared, launchOptions: nil)
 
       self.vm.inputs.didUpdateOptimizelyClient(MockOptimizelyClient())
+
+      self.goToLandingPage.assertDidNotEmitValue()
+    }
+  }
+
+  func testGoToLandingPage_DoesNotEmit_IfUserHasEnvironmentInStorage() {
+    let mockOptimizelyClient = MockOptimizelyClient()
+      |> \.experiments
+      .~ [
+        OptimizelyExperiment.Key.nativeOnboarding.rawValue:
+          OptimizelyExperiment.Variant.variant1.rawValue
+      ]
+    let mockValueStore = MockKeyValueStore()
+
+    self.goToLandingPage.assertDidNotEmitValue()
+
+    self.vm.inputs.userHasEnvironmentInStorage(true)
+
+    self.vm.inputs.applicationDidFinishLaunching(application: nil, launchOptions: nil)
+    _ = self.vm.inputs.optimizelyConfigured(with: MockOptimizelyResult())
+
+    withEnvironment(
+      currentUser: nil,
+      optimizelyClient: mockOptimizelyClient,
+      userDefaults: mockValueStore
+    ) {
+      self.vm.inputs.didUpdateOptimizelyClient(mockOptimizelyClient)
 
       self.goToLandingPage.assertDidNotEmitValue()
     }
@@ -2637,6 +2840,7 @@ final class AppDelegateViewModelTests: TestCase {
     withEnvironment(currentUser: nil, optimizelyClient: optimizelyClient, userDefaults: userDefaults) {
       self.goToLandingPage.assertDidNotEmitValue()
 
+      self.vm.inputs.userHasEnvironmentInStorage(false)
       self.vm.inputs.applicationDidFinishLaunching(application: UIApplication.shared, launchOptions: nil)
       self.vm.inputs.didUpdateOptimizelyClient(MockOptimizelyClient())
 
