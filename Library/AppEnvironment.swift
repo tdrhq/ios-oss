@@ -255,6 +255,10 @@ public struct AppEnvironment: AppEnvironmentType {
     )
   }
 
+  public static func hasEnvironmentInStorage(userDefaults: KeyValueStoreType) -> Bool {
+    return userDefaults.dictionary(forKey: self.environmentStorageKey) != nil
+  }
+
   // Returns the last saved environment from user defaults.
   public static func fromStorage(
     ubiquitousStore _: KeyValueStoreType,

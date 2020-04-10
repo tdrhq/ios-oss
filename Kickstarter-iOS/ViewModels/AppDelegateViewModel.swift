@@ -84,6 +84,9 @@ public protocol AppDelegateViewModelInputs {
   /// Call when the contextual PushNotification dialog should be presented.
   func showNotificationDialog(notification: Notification)
 
+  /// Call to notify the VM whether the user has a previously stored environment
+  func userHasEnvironmentInStorage(_ hasEnvironmentInStorage: Bool)
+
   /// Call when the controller has received a user session ended notification.
   func userSessionEnded()
 
@@ -302,10 +305,13 @@ public final class AppDelegateViewModel: AppDelegateViewModelType, AppDelegateVi
     // Onboarding
 
     self.goToCategoryPersonalizationOnboarding = Signal.combineLatest(
-      self.applicationLaunchOptionsProperty.signal.ignoreValues(),
-      self.didUpdateOptimizelyClientProperty.signal.skipNil().ignoreValues()
-    ).ignoreValues()
-      .filter(shouldSeeCategoryPersonalization)
+      self.applicationLaunchOptionsProperty.signal,
+      self.didUpdateOptimizelyClientProperty.signal.skipNil(),
+      self.userHasEnvironmentInStorageProperty.signal
+    )
+    .map(third)
+    .filter(shouldSeeCategoryPersonalization(isReturnAppUser:))
+    .ignoreValues()
 
     // Deep links
 
@@ -355,12 +361,21 @@ public final class AppDelegateViewModel: AppDelegateViewModelType, AppDelegateVi
       )
       .skipNil()
 
-    self.goToLandingPage = self.applicationLaunchOptionsProperty.signal.ignoreValues()
-      .takeWhen(self.didUpdateOptimizelyClientProperty.signal.ignoreValues())
-      .filter(shouldGoToLandingPage)
+    self.goToLandingPage = Signal.combineLatest(
+      self.applicationLaunchOptionsProperty.signal,
+      self.didUpdateOptimizelyClientProperty.signal,
+      self.userHasEnvironmentInStorageProperty.signal
+    ).map(third)
+      .filter(shouldGoToLandingPage(isReturnAppUser:))
+      .ignoreValues()
 
-    let deepLink = deeplinkActivated
-      .filter { _ in shouldGoToLandingPage() == false && shouldSeeCategoryPersonalization() == false }
+    let deepLink = self.userHasEnvironmentInStorageProperty.signal
+      .takePairWhen(deeplinkActivated)
+      .filter { isReturnAppUser, _ in
+        shouldGoToLandingPage(isReturnAppUser: isReturnAppUser) == false
+          && shouldSeeCategoryPersonalization(isReturnAppUser: isReturnAppUser) == false
+      }
+      .map(second)
       .take(until: self.goToLandingPage)
 
     self.findRedirectUrl = deepLinkUrl
@@ -817,6 +832,11 @@ public final class AppDelegateViewModel: AppDelegateViewModelType, AppDelegateVi
     self.showNotificationDialogProperty.value = notification
   }
 
+  fileprivate let userHasEnvironmentInStorageProperty = MutableProperty(false)
+  public func userHasEnvironmentInStorage(_ hasEnvironmentInStorage: Bool) {
+    self.userHasEnvironmentInStorageProperty.value = hasEnvironmentInStorage
+  }
+
   fileprivate let userSessionEndedProperty = MutableProperty(())
   public func userSessionEnded() {
     self.userSessionEndedProperty.value = ()
@@ -1129,11 +1149,11 @@ private func qualtricsConfigData() -> QualtricsConfigData {
   )
 }
 
-private func shouldSeeCategoryPersonalization() -> Bool {
+private func shouldSeeCategoryPersonalization(isReturnAppUser: Bool) -> Bool {
   let isLoggedIn = AppEnvironment.current.currentUser != nil
   let hasSeenCategoryPersonalization = AppEnvironment.current.userDefaults.hasSeenCategoryPersonalizationFlow
 
-  if isLoggedIn || hasSeenCategoryPersonalization {
+  if isLoggedIn || hasSeenCategoryPersonalization || isReturnAppUser {
     // Currently logged-in users should not see the onboarding flow
     AppEnvironment.current.userDefaults.hasSeenCategoryPersonalizationFlow = true
 
@@ -1153,10 +1173,11 @@ private func shouldSeeCategoryPersonalization() -> Bool {
   }
 }
 
-private func shouldGoToLandingPage() -> Bool {
-  let hasNotSeenLandingPage = !AppEnvironment.current.userDefaults.hasSeenLandingPage
+private func shouldGoToLandingPage(isReturnAppUser: Bool) -> Bool {
+  let isLoggedIn = AppEnvironment.current.currentUser != nil
+  let hasSeenLandingPage = AppEnvironment.current.userDefaults.hasSeenLandingPage
 
-  guard AppEnvironment.current.currentUser == nil, hasNotSeenLandingPage else {
+  if isLoggedIn || hasSeenLandingPage || isReturnAppUser {
     AppEnvironment.current.userDefaults.hasSeenLandingPage = true
 
     return false
@@ -1165,10 +1186,14 @@ private func shouldGoToLandingPage() -> Bool {
   let optimizelyVariant = AppEnvironment.current.optimizelyClient?
     .variant(for: OptimizelyExperiment.Key.nativeOnboarding)
 
-  switch optimizelyVariant {
+  guard let variant = optimizelyVariant else {
+    return false
+  }
+
+  switch variant {
   case .variant1, .variant2:
-    return hasNotSeenLandingPage
-  case .control, nil:
+    return true
+  case .control:
     return false
   }
 }

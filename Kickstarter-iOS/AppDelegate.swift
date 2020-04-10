@@ -45,6 +45,10 @@ internal final class AppDelegate: UIResponder, UIApplicationDelegate {
     UIImageView.appearance(whenContainedInInstancesOf: [UITabBar.self])
       .accessibilityIgnoresInvertColors = true
 
+    let hasEnvironmentInStorage = AppEnvironment.hasEnvironmentInStorage(userDefaults: UserDefaults.standard)
+
+    self.viewModel.inputs.userHasEnvironmentInStorage(hasEnvironmentInStorage)
+
     AppEnvironment.replaceCurrentEnvironment(
       AppEnvironment.fromStorage(
         ubiquitousStore: NSUbiquitousKeyValueStore.default,
