@@ -1154,9 +1154,6 @@ private func shouldSeeCategoryPersonalization(isReturnAppUser: Bool) -> Bool {
   let hasSeenCategoryPersonalization = AppEnvironment.current.userDefaults.hasSeenCategoryPersonalizationFlow
 
   if isLoggedIn || hasSeenCategoryPersonalization || isReturnAppUser {
-    // Currently logged-in users should not see the onboarding flow
-    AppEnvironment.current.userDefaults.hasSeenCategoryPersonalizationFlow = true
-
     return false
   }
 
@@ -1178,8 +1175,6 @@ private func shouldGoToLandingPage(isReturnAppUser: Bool) -> Bool {
   let hasSeenLandingPage = AppEnvironment.current.userDefaults.hasSeenLandingPage
 
   if isLoggedIn || hasSeenLandingPage || isReturnAppUser {
-    AppEnvironment.current.userDefaults.hasSeenLandingPage = true
-
     return false
   }
 
