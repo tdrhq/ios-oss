@@ -22,6 +22,7 @@ internal final class SettingsNotificationsViewController: UIViewController {
 
     self.tableView.dataSource = self.dataSource
     self.tableView.delegate = self
+    self.tableView.estimatedSectionFooterHeight = SettingsGroupedFooterView.defaultHeight
 
     self.emailFrequencyPickerView.delegate = self
     self.emailFrequencyPickerView.dataSource = self
@@ -29,8 +30,15 @@ internal final class SettingsNotificationsViewController: UIViewController {
     self.tableView.register(nib: .SettingsNotificationCell)
     self.tableView.register(nib: .SettingsNotificationPickerCell)
     self.tableView.registerHeaderFooter(nib: .SettingsHeaderView)
+    self.tableView.registerHeaderFooterClass(SettingsGroupedFooterView.self)
 
     self.viewModel.inputs.viewDidLoad()
+  }
+
+  override func viewDidLayoutSubviews() {
+    super.viewDidLayoutSubviews()
+
+    self.tableView.ksr_sizeHeaderFooterViewsToFit()
   }
 
   internal override func bindStyles() {
@@ -148,15 +156,22 @@ extension SettingsNotificationsViewController: UITableViewDelegate {
     guard let sectionType = dataSource.sectionType(
       section: section,
       user: AppEnvironment.current.currentUser
-    ) else {
+    ), sectionType.hasHeader else {
       return 0.0
     }
 
     return sectionType.sectionHeaderHeight
   }
 
-  func tableView(_: UITableView, heightForFooterInSection _: Int) -> CGFloat {
-    return 0.1 // Required to remove footer in table view of type "Grouped"
+  func tableView(_: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+    guard let sectionType = dataSource.sectionType(
+      section: section,
+      user: AppEnvironment.current.currentUser
+    ), sectionType.hasDescriptionFooter else {
+      return 0.1 // Required to remove the footer in UITableViewStyleGrouped
+    }
+
+    return UITableView.automaticDimension
   }
 
   func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
@@ -172,6 +187,24 @@ extension SettingsNotificationsViewController: UITableViewDelegate {
     headerView?.configure(title: sectionType.sectionTitle)
 
     return headerView
+  }
+
+  func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+    guard let sectionType = dataSource.sectionType(
+      section: section,
+      user: AppEnvironment.current.currentUser
+    ), sectionType.hasDescriptionFooter else {
+      return nil
+    }
+
+    let footerView = tableView.dequeueReusableHeaderFooterView(
+      withClass: SettingsGroupedFooterView.self
+    ) as? SettingsGroupedFooterView
+
+    let text = Strings.A_weekly_mix_of_handpicked_projects()
+    footerView?.label.text = text
+
+    return footerView
   }
 
   func tableView(_: UITableView, shouldHighlightRowAt indexPath: IndexPath) -> Bool {

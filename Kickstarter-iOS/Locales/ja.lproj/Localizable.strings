@@ -1,4 +1,5 @@
 "A_successfully_funded_project_will_collect_your_pledge_in_its_native_currency" = "プロジェクトのファンディングが成功した際には、プレッジ額はプロジェクトをローンチした国の通貨で集められます。表示されている金額はおおよその換算額ですのでご注意ください。";
+"A_weekly_mix_of_handpicked_projects" = "A weekly mix of handpicked projects, plus occasional Kickstarter news";
 "A_weekly_roundup_of_the_best_and_brightest" = "Kickstarter スタッフがセレクトした今週のおすすめプロジェクト総まとめ。";
 "About_reward_amount" = "約 %{reward_amount}　";
 "Accessibility_statement" = "アクセシビリティ・ステートメント";
@@ -29,6 +30,7 @@
 "Amount_previous_amount" = "金額: %{amount}, 以前の金額: %{previous_amount}";
 "Amount_reward" = "金額：%{amount}、%{reward}";
 "Amounts_shown" = "表示されている金額は、おおよその換算金額ですのでご注意ください。プロジェクトが成功した場合、プレッジはプロジェクトをローンチした国の通貨で集められ、その換算額も表示されます。";
+"Announcements" = "お知らせ";
 "Any_payment_methods_you_saved_to_Kickstarter" = "Kickstarter に保存されたお支払い方法は、こちらに (安全に) リストアップされます。";
 "App_version" = "アプリ版";
 "Apple_ID" = "AppleID";

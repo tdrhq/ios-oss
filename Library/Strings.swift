@@ -25,6 +25,23 @@ public enum Strings {
     )
   }
   /**
+   "A weekly mix of handpicked projects, plus occasional Kickstarter news"
+
+   - **en**: "A weekly mix of handpicked projects, plus occasional Kickstarter news"
+   - **de**: "A weekly mix of handpicked projects, plus occasional Kickstarter news"
+   - **es**: "A weekly mix of handpicked projects, plus occasional Kickstarter news"
+   - **fr**: "A weekly mix of handpicked projects, plus occasional Kickstarter news"
+   - **ja**: "A weekly mix of handpicked projects, plus occasional Kickstarter news"
+  */
+  public static func A_weekly_mix_of_handpicked_projects() -> String {
+    return localizedString(
+      key: "A_weekly_mix_of_handpicked_projects",
+      defaultValue: "A weekly mix of handpicked projects, plus occasional Kickstarter news",
+      count: nil,
+      substitutions: [:]
+    )
+  }
+  /**
    "A weekly roundup of the best and brightest projects on Kickstarter, handpicked by our team."
 
    - **en**: "A weekly roundup of the best and brightest projects on Kickstarter, handpicked by our team."
@@ -530,6 +547,23 @@ public enum Strings {
     return localizedString(
       key: "Amounts_shown",
       defaultValue: "The amounts shown are an approximate conversion. If the project is successful, your pledge will be collected in the native currency of the project, which is also displayed.",
+      count: nil,
+      substitutions: [:]
+    )
+  }
+  /**
+   "Announcements"
+
+   - **en**: "Announcements"
+   - **de**: "Ankündigungen"
+   - **es**: "Anuncios"
+   - **fr**: "Annonces"
+   - **ja**: "お知らせ"
+  */
+  public static func Announcements() -> String {
+    return localizedString(
+      key: "Announcements",
+      defaultValue: "Announcements",
       count: nil,
       substitutions: [:]
     )

@@ -15,9 +15,28 @@ public enum SettingsNotificationSectionType: Int {
   case backedProjects
   case creator
   case social
+  case fromKickstarter
 
   public var sectionHeaderHeight: CGFloat {
     return Styles.grid(9)
+  }
+
+  public var hasDescriptionFooter: Bool {
+    switch self {
+    case .fromKickstarter:
+      return true
+    default:
+      return false
+    }
+  }
+
+  public var hasHeader: Bool {
+    switch self {
+    case .fromKickstarter:
+      return false
+    default:
+      return true
+    }
   }
 
   public var cellRowsForSection: [SettingsNotificationCellType] {
@@ -28,10 +47,12 @@ public enum SettingsNotificationSectionType: Int {
       return [.pledgeActivity, .newComments, .newLikes, .creatorTips]
     case .social:
       return [.messages, .newFollowers, .friendBacksProject, .commentReplyDigest]
+    case .fromKickstarter:
+      return [.announcements]
     }
   }
 
-  public var sectionTitle: String {
+  public var sectionTitle: String? {
     switch self {
     case .backedProjects:
       return Strings.Projects_youve_backed()
@@ -39,13 +60,16 @@ public enum SettingsNotificationSectionType: Int {
       return Strings.Projects_youve_launched()
     case .social:
       return Strings.profile_settings_social_title()
+    case .fromKickstarter:
+      return nil
     }
   }
 
   public static var allCases: [SettingsNotificationSectionType] = [
     .backedProjects,
     .creator,
-    .social
+    .social,
+    .fromKickstarter
   ]
 }
 
@@ -61,6 +85,7 @@ public enum SettingsNotificationCellType {
   case newFollowers
   case friendBacksProject
   case commentReplyDigest
+  case announcements
 
   public static var allCases: [SettingsNotificationCellType] = [
     .projectUpdates,
@@ -73,7 +98,8 @@ public enum SettingsNotificationCellType {
     .messages,
     .newFollowers,
     .friendBacksProject,
-    .commentReplyDigest
+    .commentReplyDigest,
+    .announcements
   ]
 
   public var accessibilityTraits: UIAccessibilityTraits {
@@ -150,6 +176,8 @@ public enum SettingsNotificationCellType {
       return Strings.profile_settings_social_friend_backs()
     case .commentReplyDigest:
       return Strings.Comment_reply_digest()
+    case .announcements:
+      return Strings.Announcements()
     }
   }
 }
