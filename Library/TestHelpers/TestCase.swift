@@ -35,6 +35,8 @@ internal class TestCase: FBSnapshotTestCase {
   override func setUp() {
     super.setUp()
 
+    self.recordMode = true
+
     UIView.doBadSwizzleStuff()
     UIViewController.doBadSwizzleStuff()
 
