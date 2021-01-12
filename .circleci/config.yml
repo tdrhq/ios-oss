@@ -44,19 +44,19 @@ test_job: &test_job
         name: Run tests
         command: make test
         no_output_timeout: "20m" # 20 minutes
-    - restore_cache:
-        name: Restore Bundler
-        keys:
-          - v1-gems-{{ checksum "Gemfile.lock" }}
-    - run:
-        name: Install Bundler
-        command: bundle check || bundle install
-        environment:
-          BUNDLE_JOBS: 4
-          BUNDLE_RETRY: 3
-    - run:
-        name: Generate Slather coverage report
-        command: bundle exec slather coverage -x --scheme $SCHEME ./Kickstarter.xcodeproj
+    # - restore_cache:
+    #     name: Restore Bundler
+    #     keys:
+    #       - v1-gems-{{ checksum "Gemfile.lock" }}
+    # - run:
+    #     name: Install Bundler
+    #     command: bundle check || bundle install
+    #     environment:
+    #       BUNDLE_JOBS: 4
+    #       BUNDLE_RETRY: 3
+    # - run:
+    #     name: Generate Slather coverage report
+    #     command: bundle exec slather coverage -x --scheme $SCHEME ./Kickstarter.xcodeproj
     # - codecov/upload:
     #     file: cobertura.xml
 
@@ -104,52 +104,52 @@ distribute_job: &distribute_job
         path: output
 
 all_jobs: &all_jobs
-  - build-and-cache
+#  - build-and-cache
   - kickstarter-tests
 #  - kickstarter-ui-tests
 #  - library-tests
 #  - ksapi-tests
 
 jobs:
-  build-and-cache:
-    <<: *base_job
-    environment:
-      - *default_environment
-    steps:
-      - checkout
-      - run:
-          name: Store Xcode Version
-          command: xcodebuild -version > xcode_version.txt
-      - restore_cache:
-          name: Restore Carthage Cache
-          keys:
-            - carthage-cache-v1-{{ checksum "Cartfile.resolved" }}-{{ checksum "xcode_version.txt" }}
-      - run:
-          name: Bootstrap
-          command: make bootstrap
-      - save_cache:
-          name: Cache Carthage
-          key: carthage-cache-v1-{{ checksum "Cartfile.resolved" }}-{{ checksum "xcode_version.txt" }}
-          paths:
-            - Carthage
-      - restore_cache:
-          name: Restore Bundler
-          keys:
-            - v1-gems-{{ checksum "Gemfile.lock" }}
-      - run:
-          name: Install Bundler
-          command: bundle check || bundle install
-          environment:
-            BUNDLE_JOBS: 4
-            BUNDLE_RETRY: 3
-      - save_cache:
-          name: Cache Bundler
-          key: v1-gems-{{ checksum "Gemfile.lock" }}
-          paths:
-            - vendor/bundle
-      - run:
-          name: Danger
-          command: bin/danger.sh
+  # build-and-cache:
+  #   <<: *base_job
+  #   environment:
+  #     - *default_environment
+  #   steps:
+  #     - checkout
+  #     - run:
+  #         name: Store Xcode Version
+  #         command: xcodebuild -version > xcode_version.txt
+  #     - restore_cache:
+  #         name: Restore Carthage Cache
+  #         keys:
+  #           - carthage-cache-v1-{{ checksum "Cartfile.resolved" }}-{{ checksum "xcode_version.txt" }}
+  #     - run:
+  #         name: Bootstrap
+  #         command: make bootstrap
+  #     - save_cache:
+  #         name: Cache Carthage
+  #         key: carthage-cache-v1-{{ checksum "Cartfile.resolved" }}-{{ checksum "xcode_version.txt" }}
+  #         paths:
+  #           - Carthage
+  #     - restore_cache:
+  #         name: Restore Bundler
+  #         keys:
+  #           - v1-gems-{{ checksum "Gemfile.lock" }}
+  #     - run:
+  #         name: Install Bundler
+  #         command: bundle check || bundle install
+  #         environment:
+  #           BUNDLE_JOBS: 4
+  #           BUNDLE_RETRY: 3
+  #     - save_cache:
+  #         name: Cache Bundler
+  #         key: v1-gems-{{ checksum "Gemfile.lock" }}
+  #         paths:
+  #           - vendor/bundle
+  #     - run:
+  #         name: Danger
+  #         command: bin/danger.sh
 
 # Jobs
 
@@ -285,7 +285,7 @@ workflows:
   build:
     # Matches all_jobs
     jobs:
-      - build-and-cache
+#      - build-and-cache
       - kickstarter-tests
 #      - kickstarter-ui-tests
 #      - library-tests
