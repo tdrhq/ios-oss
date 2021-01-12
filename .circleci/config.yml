@@ -106,9 +106,9 @@ distribute_job: &distribute_job
 all_jobs: &all_jobs
   - build-and-cache
   - kickstarter-tests
-  - kickstarter-ui-tests
-  - library-tests
-  - ksapi-tests
+#  - kickstarter-ui-tests
+#  - library-tests
+#  - ksapi-tests
 
 jobs:
   build-and-cache:
@@ -162,46 +162,46 @@ jobs:
       - SCHEME=Kickstarter-Framework-iOS
 
   # Library tests
-  library-tests:
-    <<: *base_job
-    <<: *test_job
-    environment:
-      - *default_environment
-      - TARGET=Library
-      - SCHEME=Library-iOS
+  # library-tests:
+  #   <<: *base_job
+  #   <<: *test_job
+  #   environment:
+  #     - *default_environment
+  #     - TARGET=Library
+  #     - SCHEME=Library-iOS
 
-  # KsApi tests
-  ksapi-tests:
-    <<: *base_job
-    <<: *test_job
-    environment:
-      - *default_environment
-      - SCHEME=KsApi
+  # # KsApi tests
+  # ksapi-tests:
+  #   <<: *base_job
+  #   <<: *test_job
+  #   environment:
+  #     - *default_environment
+  #     - SCHEME=KsApi
 
   # Kickstarter UI Tests
-  kickstarter-ui-tests:
-    <<: *base_job
-    environment:
-      - *default_environment
-    steps:
-      - checkout
-      - run:
-          name: Store Xcode Version
-          command: xcodebuild -version > xcode_version.txt
-      - restore_cache:
-          name: Restore Carthage Cache
-          keys:
-            - carthage-cache-v1-{{ checksum "Cartfile.resolved" }}-{{ checksum "xcode_version.txt" }}
-      - run:
-          name: Bootstrap
-          command: make bootstrap
-      - run:
-          name: Pre-load simulator
-          command: *preload_simulator
-      - run:
-          name: Kickstarter UI Tests
-          command: SCHEME=KickstarterUITests make test
-          no_output_timeout: "20m" # 20 minutes
+  # kickstarter-ui-tests:
+  #   <<: *base_job
+  #   environment:
+  #     - *default_environment
+  #   steps:
+  #     - checkout
+  #     - run:
+  #         name: Store Xcode Version
+  #         command: xcodebuild -version > xcode_version.txt
+  #     - restore_cache:
+  #         name: Restore Carthage Cache
+  #         keys:
+  #           - carthage-cache-v1-{{ checksum "Cartfile.resolved" }}-{{ checksum "xcode_version.txt" }}
+  #     - run:
+  #         name: Bootstrap
+  #         command: make bootstrap
+  #     - run:
+  #         name: Pre-load simulator
+  #         command: *preload_simulator
+  #     - run:
+  #         name: Kickstarter UI Tests
+  #         command: SCHEME=KickstarterUITests make test
+  #         no_output_timeout: "20m" # 20 minutes
 
   deploy_alpha:
     <<: *base_job
