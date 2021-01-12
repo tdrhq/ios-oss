@@ -286,8 +286,8 @@ workflows:
     # Matches all_jobs
     jobs:
       - build-and-cache
-#      - kickstarter-tests
-      - kickstarter-ui-tests
+      - kickstarter-tests
+#      - kickstarter-ui-tests
 #      - library-tests
 #      - ksapi-tests
       - refresh_app_store_dsyms:
