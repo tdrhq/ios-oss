@@ -77,6 +77,7 @@ distribute_job: &distribute_job
         keys:
           - v1-gems-{{ checksum "Gemfile.lock" }}
     - run:
+
         name: Bundle install
         command: bundle check || bundle install
         environment:
@@ -285,10 +286,10 @@ workflows:
     # Matches all_jobs
     jobs:
       - build-and-cache
-      - kickstarter-tests
+#      - kickstarter-tests
       - kickstarter-ui-tests
-      - library-tests
-      - ksapi-tests
+#      - library-tests
+#      - ksapi-tests
       - refresh_app_store_dsyms:
           filters:
             branches:
