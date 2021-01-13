@@ -168,10 +168,10 @@ jobs:
             ~/screenshotbot/recorder --channel-name ios-oss-2 \
               --api-key ${SCREENSHOTBOT_API_KEY} \
               --api-secret ${SCREESHOTBOT_API_SECRET} \
-              --directory Screenshots/_64 \
+              --directory Screenshots/_64/ \
               --ios-multi-dir \
               --verbose \
-              -- ios-diff-dir Screenshots/FailureDiffs
+              -- ios-diff-dir Screenshots/FailureDiffs/
 
     environment:
       - *default_environment
