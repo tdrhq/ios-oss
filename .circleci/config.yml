@@ -157,7 +157,7 @@ jobs:
   # Kickstarter tests
   kickstarter-tests:
     <<: *base_job
-    #    <<: *test_job
+    <<: *test_job
     steps:
       - checkout
       - run:
