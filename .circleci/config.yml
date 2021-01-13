@@ -165,7 +165,7 @@ jobs:
       - run:
           name: Upload Screenshots to Screenshotbot
           command: >
-            cd ~/project && ~/screenshotbot/recorder --channel ios-oss-2 \
+            cd ~/kickstarter && ~/screenshotbot/recorder --channel ios-oss-2 \
               --api-key ${SCREENSHOTBOT_API_KEY} \
               --api-secret ${SCREESHOTBOT_API_SECRET} \
               --directory Screenshots/_64/ \
