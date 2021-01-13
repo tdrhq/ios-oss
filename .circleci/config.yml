@@ -24,7 +24,7 @@ base_job: &base_job
     xcode: *xcode_version
   working_directory: ~/kickstarter
 
-test_job_steps: &test_job_
+test_job_steps: &test_job_steps
   - checkout
   - run:
       name: Store Xcode Version
