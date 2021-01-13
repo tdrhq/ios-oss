@@ -172,6 +172,8 @@ jobs:
               --directory Screenshots/_64/ \
               --ios-multi-dir \
               --verbose \
+              --production \
+              --repo-url ${CIRCLE_REPOSITORY_URL} \
               --ios-diff-dir Screenshots/FailureDiffs/
 
     environment:
