@@ -165,12 +165,12 @@ jobs:
       - run:
           name: Upload Screenshots to Screenshotbot
           command: >
-            ~/screenshotbot/recorder --channel ios-oss-2 \
-              --api-key ${SCREENSHOTBOT_API_KEY} \
-              --api-secret ${SCREESHOTBOT_API_SECRET} \
-              --directory Screenshots/_64/ \
-              --ios-multi-dir \
-              --verbose \
+            cd ~/project && ~/screenshotbot/recorder --channel ios-oss-2
+              --api-key ${SCREENSHOTBOT_API_KEY}
+              --api-secret ${SCREESHOTBOT_API_SECRET}
+              --directory Screenshots/_64/
+              --ios-multi-dir
+              --verbose
               --ios-diff-dir Screenshots/FailureDiffs/
 
     environment:
@@ -306,40 +306,40 @@ workflows:
 #      - kickstarter-ui-tests
 #      - library-tests
 #      - ksapi-tests
-      - refresh_app_store_dsyms:
-          filters:
-            branches:
-              # matches all branches that begin with 'beta-dist'
-              only: /beta-dist-.*/
-      - deploy_alpha:
-          filters:
-            branches:
-              # matches all branches that contain 'feature' but do not contain 'alpha-dist'
-              only: /^((?!alpha\-dist).*feature.*)*$/
-          requires: *all_jobs
-      - deploy_beta:
-          filters:
-            branches:
-              only: master
-          requires: *all_jobs
-      - beta:
-          filters:
-            branches:
-              # matches all branches that begin with 'beta-dist'
-              only: /beta-dist-.*/
-          requires: *all_jobs
-      - alpha:
-          filters:
-            branches:
-              # matches all branches that begin with 'alpha-dist'
-              only: /alpha-dist.*/
-          requires: *all_jobs
-      - itunes:
-          filters:
-            branches:
-              # matches branch named exactly `itunes-dist`
-              only: itunes-dist
-          requires: *all_jobs
+      # - refresh_app_store_dsyms:
+      #     filters:
+      #       branches:
+      #         # matches all branches that begin with 'beta-dist'
+      #         only: /beta-dist-.*/
+      # - deploy_alpha:
+      #     filters:
+      #       branches:
+      #         # matches all branches that contain 'feature' but do not contain 'alpha-dist'
+      #         only: /^((?!alpha\-dist).*feature.*)*$/
+      #     requires: *all_jobs
+      # - deploy_beta:
+      #     filters:
+      #       branches:
+      #         only: master
+      #     requires: *all_jobs
+      # - beta:
+      #     filters:
+      #       branches:
+      #         # matches all branches that begin with 'beta-dist'
+      #         only: /beta-dist-.*/
+      #     requires: *all_jobs
+      # - alpha:
+      #     filters:
+      #       branches:
+      #         # matches all branches that begin with 'alpha-dist'
+      #         only: /alpha-dist.*/
+      #     requires: *all_jobs
+      # - itunes:
+      #     filters:
+      #       branches:
+      #         # matches branch named exactly `itunes-dist`
+      #         only: itunes-dist
+      #     requires: *all_jobs
 
 experimental:
   notify:
