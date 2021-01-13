@@ -157,8 +157,8 @@ jobs:
   kickstarter-tests:
     <<: *base_job
     #    <<: *test_job
-
     steps:
+      - checkout
       - run:
           name: Install Screenshotbot SDK
           command: curl https://screenshotbot.io/recorder.sh | sh
