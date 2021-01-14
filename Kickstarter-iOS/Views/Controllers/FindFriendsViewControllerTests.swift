@@ -50,7 +50,7 @@ internal final class FindFriendsViewControllerTests: TestCase {
       |> \.avatar.medium .~ ""
 
     let friend1 = friendNoAvatar
-      |> \.name .~ "Ron Swanson"
+      |> \.name .~ "Leslie Knope"
       |> \.location .~
       (.template |> Location.lens.displayableName .~ "Pawnee, IN")
       |> \.stats.backedProjectsCount .~ 42
@@ -58,7 +58,7 @@ internal final class FindFriendsViewControllerTests: TestCase {
       |> \.isFriend .~ true
 
     let friend2 = friendNoAvatar
-      |> \.name .~ "David Byrne"
+      |> \.name .~ "Justin Bieber"
       |> \.location .~
       (.template |> Location.lens.displayableName .~ "New York, NY")
       |> \.stats.backedProjectsCount .~ 365
