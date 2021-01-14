@@ -24,29 +24,26 @@ base_job: &base_job
     xcode: *xcode_version
   working_directory: ~/kickstarter
 
-test_job_steps: &test_job_steps
-  - checkout
-  - run:
-      name: Store Xcode Version
-      command: xcodebuild -version > xcode_version.txt
-  - restore_cache:
-      name: Restore Carthage Cache
-      keys:
-        - carthage-cache-v1-{{ checksum "Cartfile.resolved" }}-{{ checksum "xcode_version.txt" }}
-  - run:
-      name: Bootstrap
-      command: make bootstrap
-  - run:
-      name: Pre-load simulator
-      command: *preload_simulator # Note we may no longer need to preload the simulator, this was a workaround before.
-  - run:
-      name: Run tests
-      command: make test
-      no_output_timeout: "20m" # 20 minutes
-
 test_job: &test_job
   steps:
-    <<: *test_job_steps
+    - checkout
+    - run:
+        name: Store Xcode Version
+        command: xcodebuild -version > xcode_version.txt
+    - restore_cache:
+        name: Restore Carthage Cache
+        keys:
+          - carthage-cache-v1-{{ checksum "Cartfile.resolved" }}-{{ checksum "xcode_version.txt" }}
+    - run:
+        name: Bootstrap
+        command: make bootstrap
+    - run:
+        name: Pre-load simulator
+        command: *preload_simulator # Note we may no longer need to preload the simulator, this was a workaround before.
+    - run:
+        name: Run tests
+        command: make test
+        no_output_timeout: "20m" # 20 minutes
     # - restore_cache:
     #     name: Restore Bundler
     #     keys:
@@ -161,10 +158,13 @@ jobs:
   kickstarter-tests:
     <<: *base_job
     steps:
-      <<: *test_job_steps
+      - when:
+          condition: true
+          <<: *test_job
       - run:
           name: Install Screenshotbot SDK
           command: curl https://screenshotbot.io/recorder.sh | sh
+          when: always
       - run:
           name: Upload Screenshots to Screenshotbot
           command: >
@@ -177,6 +177,7 @@ jobs:
               --production \
               --repo-url ${CIRCLE_REPOSITORY_URL} \
               --ios-diff-dir Screenshots/FailureDiffs/
+          when: always
 
     environment:
       - *default_environment
